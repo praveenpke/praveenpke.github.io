@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Praveen Keertipati — Senior Software Engineer → AI Infrastructure</title>
+<meta name="description" content="Engineer building production systems at the intersection of distributed infrastructure and AI. LLM cost optimization, evaluation, and observability.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0a0a0b;
+  --bg-elevated: #111113;
+  --bg-card: #16161a;
+  --accent: #c4f042;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #555;
+  --border: #222;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-serif: 'Newsreader', serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-color: var(--text-dim) var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+a:hover {
+  opacity: 0.8;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 11, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.nav-logo span {
+  color: var(--accent);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+.nav-links a:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  transition: transform 0.3s, opacity 0.3s;
+}
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ─── SECTIONS ─── */
+section {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 6rem 2rem;
+}
+
+.section-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 56px;
+}
+
+.hero-name {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.hero-name span {
+  color: var(--accent);
+}
+
+.hero-title {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+.hero-title span {
+  color: var(--accent);
+}
+
+.hero-tagline {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+.hero-links {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.hero-links a {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1.2rem;
+  border-radius: 2px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.hero-links a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* ─── PROJECTS ─── */
+.projects-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  padding: 2rem;
+  transition: border-color 0.3s, transform 0.2s;
+  position: relative;
+}
+.project-card:hover {
+  border-left-color: var(--accent);
+  transform: translateX(4px);
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.project-name {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.project-status {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.status-progress {
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.status-production {
+  color: var(--text-muted);
+  border: 1px solid var(--text-dim);
+}
+
+.project-desc {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.project-tech span {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+}
+
+.project-links {
+  display: flex;
+  gap: 1rem;
+}
+.project-links a {
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+/* ─── BLOG ─── */
+.blog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.blog-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--border);
+  transition: padding-left 0.3s, border-color 0.3s;
+  cursor: pointer;
+  gap: 1rem;
+}
+.blog-entry:first-child {
+  border-top: 1px solid var(--border);
+}
+.blog-entry:hover {
+  padding-left: 1rem;
+  border-color: var(--text-dim);
+}
+
+.blog-entry-left {
+  flex: 1;
+}
+
+.blog-title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+  transition: color 0.2s;
+}
+.blog-entry:hover .blog-title {
+  color: var(--accent);
+}
+
+.blog-tag {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.blog-date {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* ─── ABOUT ─── */
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+.about-bio {
+  grid-column: 1 / -1;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+.about-bio strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.about-section h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.about-section ul {
+  list-style: none;
+}
+.about-section li {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 0.3rem 0;
+  padding-left: 1rem;
+  position: relative;
+}
+.about-section li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--text-dim);
+}
+
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tech-tags span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+  border-radius: 2px;
+}
+
+/* ─── EXPERIENCE ─── */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 3rem;
+}
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateX(-3.5px);
+}
+
+.timeline-period {
+  font-size: 0.7rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-role {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.timeline-company {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.timeline-desc {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* ─── CONTACT ─── */
+.contact-section {
+  text-align: center;
+}
+
+.contact-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.contact-tagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+}
+
+.contact-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.contact-links a {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.6rem 1.5rem;
+  border-radius: 2px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.contact-links a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 11, 0.97);
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .hamburger {
+    display: flex;
+  }
+
+  .hero-name {
+    font-size: 2.2rem;
+  }
+  .hero-tagline {
+    font-size: 1.05rem;
+  }
+
+  section {
+    padding: 4rem 1.5rem;
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .blog-entry {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .project-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+
+  .contact-section h2 {
+    font-size: 1.8rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">pk<span>.</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">About Me</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#blog">Blog</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="reveal">
+    <p class="hero-title">Senior Software Engineer <span>→</span> AI Infrastructure</p>
+    <h1 class="hero-name">Praveen<br>Keertipati<span>.</span></h1>
+    <p class="hero-tagline">Building systems that ship. From multi-tenant SaaS to LLM infrastructure — I solve hard problems with honest code.</p>
+    <div class="hero-links">
+      <a href="https://github.com/praveenpke" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/praveenkemani/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:your@email.com">Email</a>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <p class="section-label reveal">Selected Work</p>
+  <h2 class="reveal">Projects</h2>
+  <div class="projects-grid">
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-name">InferCost</span>
+        <span class="project-status status-progress">In Progress</span>
+      </div>
+      <p class="project-desc">LLM cost optimization gateway that sits between your app and model providers. Intelligent routing, caching, and cost tracking to cut inference spend without sacrificing quality.</p>
+      <div class="project-tech">
+        <span>Python</span>
+        <span>FastAPI</span>
+        <span>Redis</span>
+        <span>PostgreSQL</span>
+        <span>Docker</span>
+      </div>
+      <div class="project-links">
+        <a href="https://github.com/praveenpke/infercost" target="_blank" rel="noopener">GitHub →</a>
+        <a href="#" target="_blank" rel="noopener">Live Demo →</a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-name">EvalForge</span>
+        <span class="project-status status-progress">In Progress</span>
+      </div>
+      <p class="project-desc">LLM evaluation framework for benchmarking model performance across custom datasets. Pluggable evaluators, versioned test suites, and automated regression detection.</p>
+      <div class="project-tech">
+        <span>Python</span>
+        <span>LangChain</span>
+        <span>Pytest</span>
+        <span>DuckDB</span>
+      </div>
+      <div class="project-links">
+        <a href="https://github.com/praveenpke/evalforge" target="_blank" rel="noopener">GitHub →</a>
+        <a href="#" target="_blank" rel="noopener">Docs →</a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-name">Airline SaaS Platform</span>
+        <span class="project-status status-production">Production</span>
+      </div>
+      <p class="project-desc">Multi-tenant airline operations platform on AWS EKS. Event-driven architecture, tenant isolation, Prometheus/Grafana observability, 99.9% uptime.</p>
+      <div class="project-tech">
+        <span>Node.js</span>
+        <span>Angular</span>
+        <span>MongoDB</span>
+        <span>AWS EKS</span>
+        <span>Prometheus</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- BLOG -->
+<section id="blog">
+  <p class="section-label reveal">Writing</p>
+  <h2 class="reveal">Blog</h2>
+  <div class="blog-list reveal">
+
+    <div class="blog-entry" onclick="window.location.href='posts/llm-cost-optimization.html'">
+      <div class="blog-entry-left">
+        <p class="blog-title">Why Most LLM Cost Optimization Is Theater</p>
+        <span class="blog-tag">AI Infrastructure</span>
+      </div>
+      <span class="blog-date">2025</span>
+    </div>
+
+    <div class="blog-entry" onclick="window.location.href='posts/monolith-to-microservices.html'">
+      <div class="blog-entry-left">
+        <p class="blog-title">From Monolith to Microservices: What Actually Matters</p>
+        <span class="blog-tag">Distributed Systems</span>
+      </div>
+      <span class="blog-date">2025</span>
+    </div>
+
+    <div class="blog-entry" onclick="window.location.href='posts/llm-eval-framework.html'">
+      <div class="blog-entry-left">
+        <p class="blog-title">Building an LLM Eval Framework From Scratch</p>
+        <span class="blog-tag">AI Engineering</span>
+      </div>
+      <span class="blog-date">2025</span>
+    </div>
+
+    <div class="blog-entry" onclick="window.location.href='posts/bipedal-locomotion.html'">
+      <div class="blog-entry-left">
+        <p class="blog-title">Bipedal Locomotion: What Robotics Gets Wrong About Walking</p>
+        <span class="blog-tag">Robotics / Research</span>
+      </div>
+      <span class="blog-date">2025</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="section-label reveal">Background</p>
+  <h2 class="reveal">About Me</h2>
+  <div class="about-content reveal">
+
+    <p class="about-bio">Engineer with <strong>6+ years</strong> building production multi-tenant SaaS systems in the airline industry. Led a monolith-to-microservices migration on <strong>AWS EKS</strong> with event-driven architecture. Now transitioning to <strong>AI infrastructure</strong> — building tools for LLM cost optimization, evaluation, and observability. I care about hard problems, honest code, and systems that actually ship.</p>
+
+    <div class="about-section">
+      <h3>Focus Areas</h3>
+      <ul>
+        <li>LLM Platform Engineering</li>
+        <li>Distributed Systems</li>
+        <li>Cost Optimization</li>
+        <li>Observability</li>
+      </ul>
+    </div>
+
+    <div class="about-section">
+      <h3>Education</h3>
+      <ul>
+        <li>M.S. Computer Networking</li>
+        <li>Wichita State University</li>
+      </ul>
+    </div>
+
+    <div class="about-section">
+      <h3>Tech Stack</h3>
+      <div class="tech-tags">
+        <span>Python</span>
+        <span>Node.js</span>
+        <span>TypeScript</span>
+        <span>PostgreSQL</span>
+        <span>MongoDB</span>
+        <span>Redis</span>
+        <span>Docker</span>
+        <span>Kubernetes</span>
+        <span>AWS</span>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h3>Beyond Code</h3>
+      <ul>
+        <li>Robotics</li>
+        <li>Consciousness Studies</li>
+        <li>Isha Yoga</li>
+        <li>Building things with my kid</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <p class="section-label reveal">Career</p>
+  <h2 class="reveal">Experience</h2>
+  <div class="timeline reveal">
+
+    <div class="timeline-item">
+      <p class="timeline-period">2019 — Present</p>
+      <p class="timeline-role">Senior Software Engineer</p>
+      <p class="timeline-company">AI Crew Solutions</p>
+      <p class="timeline-desc">Building and scaling multi-tenant SaaS platform for airline operations. Led monolith-to-microservices migration on AWS EKS. Event-driven architecture, tenant isolation, Prometheus/Grafana observability stack. 99.9% uptime in production.</p>
+    </div>
+
+    <div class="timeline-item">
+      <p class="timeline-period">2025 — Present</p>
+      <p class="timeline-role">AI Infrastructure — Independent Projects</p>
+      <p class="timeline-company">Open Source</p>
+      <p class="timeline-desc">Building InferCost (LLM cost optimization gateway) and EvalForge (LLM evaluation framework). Focused on making AI infrastructure more observable, testable, and cost-efficient.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+  <div class="reveal">
+    <p class="section-label">Get In Touch</p>
+    <h2>Let's build something.</h2>
+    <p class="contact-tagline">Always open to interesting problems and good conversations.</p>
+    <div class="contact-links">
+      <a href="mailto:your@email.com">Email</a>
+      <a href="https://github.com/praveenpke" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/praveenkemani/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2025 Praveen Keertipati. Built with vanilla HTML/CSS/JS.</p>
+</footer>
+
+<script>
+// Mobile nav toggle
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('open');
+});
+
+// Close mobile nav on link click
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('open');
+  });
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
