@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building Multi-Agent Systems with LangGraph — Praveen Emani</title>
+<meta name="description" content="A deep dive into multi-agent orchestration with LangGraph, using TripForge as a case study for parallel fan-out, conditional routing, and human-in-the-loop patterns.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0a0a0b;
+  --bg-elevated: #111113;
+  --accent: #c4f042;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #555;
+  --border: #222;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-serif: 'Newsreader', serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film grain */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+a:hover {
+  opacity: 0.8;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 11, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.nav-logo span {
+  color: var(--accent);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+.nav-links a:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ARTICLE */
+.post {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 8rem 2rem 4rem;
+}
+
+.post-back {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 3rem;
+  transition: color 0.2s;
+}
+.post-back:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.post-meta {
+  margin-bottom: 2.5rem;
+}
+
+.post-tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.post-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.post-date {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.post-body {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+}
+
+.post-body h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2.5rem 0 1rem;
+}
+
+.post-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2rem 0 0.75rem;
+}
+
+.post-body p {
+  margin-bottom: 1.25rem;
+}
+
+.post-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.post-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-elevated);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+.post-body pre {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 3px;
+}
+.post-body pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.post-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.post-body ul, .post-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.post-body li {
+  margin-bottom: 0.5rem;
+}
+
+.post-body img {
+  max-width: 100%;
+  border-radius: 3px;
+  margin: 1.5rem 0;
+}
+
+.post-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 11, 0.97);
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .hamburger {
+    display: flex;
+  }
+
+  .post {
+    padding: 6rem 1.5rem 3rem;
+  }
+  .post-title {
+    font-size: 1.6rem;
+  }
+  .post-body {
+    font-size: 1rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo">pk<span>.</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="../index.html#about">About Me</a></li>
+    <li><a href="../index.html#projects">Projects</a></li>
+    <li><a href="../index.html#blog">Blog</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- POST -->
+<article class="post">
+  <a href="../index.html#blog" class="post-back">&larr; Back to all posts</a>
+
+  <div class="post-meta">
+    <span class="post-tag">LANGGRAPH / AI INFRASTRUCTURE</span>
+    <h1 class="post-title">Building Multi-Agent Systems with LangGraph</h1>
+    <p class="post-date">March 2026</p>
+  </div>
+
+  <div class="post-body">
+    <p>Single-chain LLM architectures hit a wall fast. You can prompt-engineer your way through a straightforward Q&A flow or a simple RAG pipeline, but the moment your task has <strong>interdependent subtasks</strong> that require different reasoning strategies, different tool access, and different model trade-offs, a monolithic chain starts to buckle. The context window bloats. The prompt becomes a tangled mess of conditional instructions. Error recovery is nonexistent because the whole chain is one undifferentiated blob of state.</p>
+
+    <p>Multi-agent systems solve this by decomposing a complex workflow into specialized agents, each with a focused prompt, its own tool set, and a well-defined contract for what it reads from and writes to shared state. The orchestration layer handles routing, parallelism, and checkpointing. The agents handle reasoning. LangGraph gives you the primitives to build this cleanly: a <code>StateGraph</code> where nodes are agents, edges are routing logic, and the state object is your single source of truth.</p>
+
+    <p>This post walks through how I built <strong>TripForge</strong>, a multi-agent travel planning system, to illustrate the patterns that matter most when you move from single-chain to multi-agent.</p>
+
+    <h2>The Architecture: Five Agents on a StateGraph</h2>
+
+    <p>TripForge plans multi-city trips. A user says something like "Plan a 10-day trip through Japan, budget $5,000, I want temples and street food." The system produces a day-by-day itinerary with routes, hotels, activities, and a reconciled budget. That workflow decomposes into five agents:</p>
+
+    <ul>
+      <li><strong>Route Planner</strong> &mdash; determines the city-to-city sequence, transit modes, and timing. This is the reasoning-heavy agent: it needs to consider geography, travel time, and how the route affects downstream hotel and activity options.</li>
+      <li><strong>Accommodation Agent</strong> &mdash; finds and ranks hotels for each city segment, respecting the per-night budget allocation from the route plan.</li>
+      <li><strong>Activity Agent</strong> &mdash; curates activities per city, matching the user's stated interests against availability and time constraints.</li>
+      <li><strong>Budget Reconciler</strong> &mdash; aggregates costs from routes, accommodation, and activities, then determines whether the plan is within budget or needs adjustment.</li>
+      <li><strong>Replanner</strong> &mdash; if the budget is blown, this agent identifies the highest-impact cuts and regenerates the relevant plan segments.</li>
+    </ul>
+
+    <p>Here is the core graph definition:</p>
+
+    <pre><code>from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.postgres import PostgresSaver
+
+builder = StateGraph(TripState)
+
+# Add agent nodes
+builder.add_node("route_planner", route_planner_agent)
+builder.add_node("accommodation", accommodation_agent)
+builder.add_node("activity", activity_agent)
+builder.add_node("budget_reconciler", budget_reconciler_agent)
+builder.add_node("replanner", replanner_agent)
+
+# Entry point
+builder.set_entry_point("route_planner")
+
+# After route approval, fan out to parallel agents
+builder.add_edge("route_planner", "accommodation")
+builder.add_edge("route_planner", "activity")
+
+# Both converge at budget reconciliation
+builder.add_edge("accommodation", "budget_reconciler")
+builder.add_edge("activity", "budget_reconciler")
+
+# Conditional routing from budget reconciler
+builder.add_conditional_edges(
+    "budget_reconciler",
+    budget_decision,
+    {
+        "within_budget": END,
+        "over_budget": "replanner",
+        "needs_approval": END,  # human reviews
+    },
+)
+builder.add_edge("replanner", "budget_reconciler")
+
+# Human-in-the-loop gates
+builder.interrupt_before(["route_planner", "budget_reconciler"])
+
+checkpointer = PostgresSaver.from_conn_string(DATABASE_URL)
+graph = builder.compile(checkpointer=checkpointer)</code></pre>
+
+    <p>That is the entire orchestration topology in about 30 lines. Every behavioral concern &mdash; what the route planner actually does, how the budget reconciler reasons about trade-offs &mdash; lives inside the individual agent functions. The graph only defines <em>flow</em>.</p>
+
+    <h2>Key Patterns</h2>
+
+    <h3>Parallel Fan-Out</h3>
+
+    <p>Once the route is locked, accommodation and activity search are independent. There is no reason to run them sequentially. LangGraph supports this natively: when a single node has multiple outgoing edges, the targets execute in parallel. The graph runtime collects both results before advancing to the next node.</p>
+
+    <pre><code># The fan-out is implicit in the edge definition.
+# Both edges originate from "route_planner":
+builder.add_edge("route_planner", "accommodation")
+builder.add_edge("route_planner", "activity")
+
+# LangGraph runs accommodation and activity concurrently.
+# budget_reconciler only fires once BOTH have written
+# their results to TripState. The state reducer merges
+# partial updates using the reducer functions defined
+# on each field of TripState:
+
+class TripState(TypedDict):
+    route_plan: Annotated[RoutePlan, replace]
+    accommodations: Annotated[list[Hotel], merge_lists]
+    activities: Annotated[list[Activity], merge_lists]
+    budget_status: Annotated[BudgetStatus, replace]
+    messages: Annotated[list[BaseMessage], add_messages]</code></pre>
+
+    <p>The <code>Annotated</code> reducers are critical. When two agents write to the same state concurrently, LangGraph needs to know how to merge. <code>merge_lists</code> concatenates; <code>replace</code> takes the latest write. Getting these wrong produces subtle, hard-to-debug state corruption.</p>
+
+    <h3>Conditional Routing</h3>
+
+    <p>The budget reconciler is the decision point. It examines total cost against the user's budget and returns one of three verdicts. The <code>budget_decision</code> function inspects the reconciler's output and returns a string key that maps to the next node:</p>
+
+    <ul>
+      <li><strong>within_budget</strong> &mdash; the plan is good. Proceed to the terminal node. The user gets their itinerary.</li>
+      <li><strong>over_budget</strong> &mdash; route to the replanner, which trims costs and cycles back to the reconciler for another pass.</li>
+      <li><strong>needs_approval</strong> &mdash; the plan is slightly over budget (within a configurable threshold). Pause for human review rather than automatically cutting.</li>
+    </ul>
+
+    <p>This loop &mdash; reconciler to replanner and back &mdash; can execute multiple times. In practice, I cap it at three iterations to prevent runaway cycles. The replanner's state includes an <code>iteration_count</code> field, and on the third pass, it forces a "needs_approval" verdict regardless of budget status.</p>
+
+    <h3>Human-in-the-Loop</h3>
+
+    <p>LangGraph's <code>interrupt_before</code> is deceptively simple but architecturally significant. When the graph reaches a node listed in <code>interrupt_before</code>, it serializes the current state to the checkpointer and halts. The calling application receives a signal that the graph is paused. The user can review the proposed route, approve or modify it, and then resume the graph from exactly where it stopped.</p>
+
+    <p>This is not just a UX nicety. For TripForge, route approval is a <strong>correctness gate</strong>. The route determines everything downstream. If the user wants to swap Osaka for Hiroshima, you need that correction before the accommodation and activity agents burn tokens on the wrong cities. The second gate, at budget reconciliation, lets users accept a slightly-over-budget plan rather than forcing automated cuts they might not want.</p>
+
+    <h3>State Checkpointing</h3>
+
+    <p>The <code>PostgresSaver</code> checkpointer persists the full graph state after every node execution. This buys you three things: resumability (users can close the browser and come back), debuggability (you can replay any step from a checkpoint), and fault tolerance (if the activity agent fails mid-execution, you restart from the last successful checkpoint, not from scratch). In a production deployment, this is non-negotiable. LLM calls are expensive and slow. Losing a partially completed plan because of a transient API error is unacceptable.</p>
+
+    <h2>Per-Agent Model Selection with LiteLLM</h2>
+
+    <p>Not every agent needs the same model. The route planner is doing genuine multi-constraint reasoning &mdash; balancing geography, transit logistics, time allocation, and user preferences. That agent gets <strong>Claude Sonnet</strong>. The accommodation and activity agents are mostly doing structured retrieval and ranking, which is well within the capability of a faster, cheaper model. Those run on <strong>Claude Haiku</strong>.</p>
+
+    <p>LiteLLM makes this trivial. Each agent function instantiates its own <code>ChatLiteLLM</code> client with the appropriate model string. The orchestration layer does not care &mdash; it just calls the agent function and collects the state update. This pattern cut our per-plan inference cost by roughly 40% compared to running Sonnet everywhere, with no measurable quality degradation on the structured-output agents.</p>
+
+    <h2>When Multi-Agent Is (and Isn't) Worth It</h2>
+
+    <p>The orchestration complexity is real. You are now debugging a distributed system, not a linear chain. State reducers can silently corrupt data. Conditional routing logic can create infinite loops if you are not careful with termination conditions. Checkpoint storage adds infrastructure cost. The fan-out pattern means you are paying for concurrent LLM calls that might partially fail, requiring retry logic at the graph level.</p>
+
+    <p>Multi-agent is worth it when:</p>
+    <ul>
+      <li>Your task naturally decomposes into <strong>subtasks with different tool and model requirements</strong>.</li>
+      <li>Subtasks can run in parallel, and the wall-clock time savings matter.</li>
+      <li>You need human checkpoints at specific decision points, not just at the end.</li>
+      <li>The workflow has <strong>conditional branches</strong> &mdash; different paths based on intermediate results.</li>
+      <li>You need fault tolerance and resumability for long-running plans.</li>
+    </ul>
+
+    <p>Stick with a single chain when:</p>
+    <ul>
+      <li>The task is fundamentally sequential with no meaningful branching.</li>
+      <li>All subtasks need the same tools and the same model.</li>
+      <li>The total token budget is small enough that a single context window handles it.</li>
+      <li>You do not need intermediate human review.</li>
+    </ul>
+
+    <hr>
+
+    <p>LangGraph's contribution is not inventing multi-agent orchestration &mdash; these patterns existed long before it. Its contribution is giving you a <strong>declarative, inspectable graph</strong> that separates orchestration topology from agent logic, with first-class support for checkpointing and human-in-the-loop. For a system like TripForge, where the workflow is complex but well-structured, that abstraction pays for itself quickly. The key lesson: design your state schema and reducers as carefully as you design your prompts. The graph is only as reliable as its state management.</p>
+  </div>
+</article>
+
+<footer>
+  <p>&copy; 2025 Praveen Emani. Built with vanilla HTML/CSS/JS.</p>
+</footer>
+
+<script>
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>

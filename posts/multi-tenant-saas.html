@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Tenant SaaS: One Codebase, Seven Customers — Praveen Emani</title>
+<meta name="description" content="How we serve 7 enterprise customers with different auth, business rules, theming, and data sources from a single deployment using config-driven multi-tenant architecture.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0a0a0b;
+  --bg-elevated: #111113;
+  --accent: #c4f042;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #555;
+  --border: #222;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-serif: 'Newsreader', serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film grain */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+a:hover {
+  opacity: 0.8;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 11, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.nav-logo span {
+  color: var(--accent);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+.nav-links a:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ARTICLE */
+.post {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 8rem 2rem 4rem;
+}
+
+.post-back {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 3rem;
+  transition: color 0.2s;
+}
+.post-back:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.post-meta {
+  margin-bottom: 2.5rem;
+}
+
+.post-tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.post-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.post-date {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.post-body {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+}
+
+.post-body h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2.5rem 0 1rem;
+}
+
+.post-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2rem 0 0.75rem;
+}
+
+.post-body p {
+  margin-bottom: 1.25rem;
+}
+
+.post-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.post-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-elevated);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+.post-body pre {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 3px;
+}
+.post-body pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.post-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.post-body ul, .post-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.post-body li {
+  margin-bottom: 0.5rem;
+}
+
+.post-body img {
+  max-width: 100%;
+  border-radius: 3px;
+  margin: 1.5rem 0;
+}
+
+.post-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 11, 0.97);
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .hamburger {
+    display: flex;
+  }
+
+  .post {
+    padding: 6rem 1.5rem 3rem;
+  }
+  .post-title {
+    font-size: 1.6rem;
+  }
+  .post-body {
+    font-size: 1rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo">pk<span>.</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="../index.html#about">About Me</a></li>
+    <li><a href="../index.html#projects">Projects</a></li>
+    <li><a href="../index.html#blog">Blog</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- POST -->
+<article class="post">
+  <a href="../index.html#blog" class="post-back">&larr; Back to all posts</a>
+
+  <div class="post-meta">
+    <span class="post-tag">ARCHITECTURE / SAAS</span>
+    <h1 class="post-title">Multi-Tenant SaaS: One Codebase, Seven Customers</h1>
+    <p class="post-date">March 2026</p>
+  </div>
+
+  <div class="post-body">
+    <p>How do you serve seven enterprise customers&mdash;each with different auth providers, different business rules, different UI theming, and different data sources&mdash;from a single deployment? Not seven forks. Not seven branches. One codebase, one CI/CD pipeline, one deployment artifact. That was the constraint we set when the platform had three customers and it became obvious we would not survive the next two years maintaining per-client branches. What followed was a ground-up rearchitecture into a config-driven multi-tenant system that cut onboarding time from six-plus weeks to under five days and directly enabled three new enterprise contracts.</p>
+
+    <h2>Why Database-Per-Tenant</h2>
+    <p>The first architectural decision was isolation model. There are three common strategies for multi-tenant data isolation: <strong>shared schema</strong> (all tenants in one database, distinguished by a tenant ID column), <strong>schema-per-tenant</strong> (one schema per customer inside a shared database), and <strong>database-per-tenant</strong> (completely separate databases). We chose database-per-tenant, and the reasons were non-negotiable.</p>
+
+    <p>Two of our enterprise customers operate in regulated industries where compliance audits require demonstrable data isolation. Shared-schema architectures fail this bar&mdash;an auditor will not accept a <code>WHERE tenant_id = ?</code> clause as proof that Customer A's data is isolated from Customer B's. One customer had it written into their contract: their data must reside in a physically separate datastore. Schema-per-tenant gets closer, but backup, restore, and migration operations still affect the shared database engine, which creates risk surface area during audits.</p>
+
+    <p>Database-per-tenant gives us complete isolation. Each customer's data lives in its own MongoDB replica set. Backups are independent. Migrations can be rolled out per-tenant, which is critical when one customer is on a slower approval cycle. The trade-off is operational: we now manage six replica sets (with a seventh provisioned). But the compliance clarity is worth it.</p>
+
+    <h2>Tenant Resolution</h2>
+    <p>Every inbound request must resolve to a tenant context before anything else happens. We handle this through an encrypted customer identifier embedded in the JWT. When a user authenticates&mdash;whether through SAML, OAuth2, or a custom SSO flow&mdash;the auth layer issues a token containing an encrypted tenant ID. The API gateway middleware decrypts this, resolves it against the tenant registry, and attaches the full tenant context (database connection, config profile, feature flags) to the request object.</p>
+
+    <p>For inter-service communication, the pattern extends. Services do not re-authenticate on every hop. Instead, they propagate an encrypted context header that carries the tenant ID, the originating service identifier, and a timestamp. The receiving service validates the encryption, checks the timestamp against a 30-second window to prevent replay attacks, and resolves the tenant context from there.</p>
+
+    <p>Here is the core middleware pattern:</p>
+
+    <pre><code>// Tenant resolution middleware
+async function resolveTenant(req, res, next) {
+  const token = req.headers.authorization?.split('Bearer ')[1];
+  const serviceContext = req.headers['x-tenant-context'];
+
+  let tenantId;
+
+  if (token) {
+    // External request: decrypt tenant ID from JWT
+    const decoded = await verifyAndDecrypt(token, TOKEN_SECRET);
+    tenantId = decoded.tenantId;
+  } else if (serviceContext) {
+    // Inter-service request: validate encrypted context header
+    const ctx = decrypt(serviceContext, SERVICE_SECRET);
+    const age = Date.now() - ctx.timestamp;
+    if (age > 30_000) {
+      return res.status(401).json({ error: 'Context expired' });
+    }
+    tenantId = ctx.tenantId;
+  } else {
+    return res.status(401).json({ error: 'No tenant context' });
+  }
+
+  // Resolve tenant config and DB connection
+  const tenant = await tenantRegistry.resolve(tenantId);
+  if (!tenant) {
+    return res.status(403).json({ error: 'Unknown tenant' });
+  }
+
+  req.tenant = tenant;         // full config object
+  req.db = tenant.dbConnection; // pre-pooled connection
+  next();
+}</code></pre>
+
+    <p>This middleware sits at the top of every service's request chain. By the time a route handler executes, <code>req.tenant</code> contains the full configuration profile&mdash;auth provider settings, feature flags, UI configuration, notification preferences&mdash;and <code>req.db</code> points to the correct database. No downstream code ever needs to think about which tenant it is serving.</p>
+
+    <h2>Config-Driven Everything</h2>
+    <p>The real leverage in this architecture is not the isolation model. It is the config layer. Every dimension of customer variation is expressed as configuration, not code. This includes:</p>
+
+    <ul>
+      <li><strong>Auth providers:</strong> SAML for three customers, OAuth2 for two, custom OIDC for two. The auth module reads provider type, endpoints, certificate paths, and claim mappings from config.</li>
+      <li><strong>Business rules:</strong> Approval workflows, validation logic, notification triggers, rate limits. Each customer has a rules profile that the engine evaluates at runtime.</li>
+      <li><strong>UI layouts and navigation:</strong> Which modules appear in the sidebar, which dashboard widgets load, which features are visible. All driven by a layout config per tenant.</li>
+      <li><strong>Theming:</strong> Over 60 color tokens, logo URLs, font preferences, favicon. The frontend pulls the theme config at login and applies it before the first render.</li>
+      <li><strong>Notification preferences:</strong> Email templates, webhook endpoints, Slack integrations, digest frequency. Fully per-tenant.</li>
+      <li><strong>Data source routing:</strong> Some tenants connect to external APIs for enrichment data. The connector configs&mdash;endpoints, auth credentials, polling intervals&mdash;are all stored per-tenant.</li>
+    </ul>
+
+    <p>All of this lives in a dedicated configuration database. When a tenant context is resolved, the config is loaded (and cached with a short TTL). Changing a customer's auth provider from OAuth2 to SAML is a config update, not a code change. Adding a new dashboard widget for one customer does not affect the other six.</p>
+
+    <h2>The Onboarding Win</h2>
+    <p>Before this architecture, onboarding a new enterprise customer meant forking code, customizing auth integration, building their business rules into the application, styling their UI, and deploying a separate instance. Minimum timeline: six weeks, often longer. It required dedicated engineering effort and introduced a maintenance branch that would drift from the main codebase.</p>
+
+    <p>After the rearchitecture, onboarding is a configuration exercise. Provision a new MongoDB replica set. Create the tenant entry in the registry. Define the config profile: auth provider details, business rules, UI layout, theme tokens, notification settings, data source connections. Run the seed scripts. Total time: <strong>under five days</strong>, and most of that is waiting on the customer to provide their IdP metadata and approve the theme mockup.</p>
+
+    <blockquote>
+      <p>This directly enabled signing three new contracts. Sales could commit to onboarding timelines that were previously impossible. The architecture became a competitive advantage.</p>
+    </blockquote>
+
+    <h2>Network Isolation and Security</h2>
+    <p>Multi-tenancy at the application layer is not enough if the network layer is flat. We run VPC-per-product isolation, meaning each major product vertical operates in its own virtual private cloud. Services within a VPC communicate over private subnets. Cross-VPC traffic routes through encrypted tunnels with mutual TLS.</p>
+
+    <p>Inter-service authentication uses short-lived encrypted tokens scoped to specific service pairs. A service cannot call another service it is not explicitly authorized to reach. The encrypted context headers described earlier are part of this&mdash;they prevent a compromised service from fabricating tenant contexts for tenants it does not serve.</p>
+
+    <h2>The Trade-offs</h2>
+    <p>This architecture is not free. Managing six MongoDB replica sets (soon seven) requires operational investment. Monitoring, alerting, backup verification, capacity planning&mdash;all multiplied by the tenant count. We built tooling to automate most of this, but the complexity is real.</p>
+
+    <p>Config complexity is its own form of tech debt. When everything is configurable, the configuration space becomes large. We have seen cases where a subtle interaction between a business rule config and a notification config produced unexpected behavior for one tenant. Testing across all tenant configurations is essential but expensive. We run a nightly suite that boots each tenant's config profile and validates critical paths.</p>
+
+    <p>Schema migrations require coordination. Even though each tenant has its own database, the application code expects a consistent schema. We run migrations sequentially, tenant by tenant, with automated rollback if any tenant fails. This is slower than a single migration but significantly safer.</p>
+
+    <h3>Debugging across tenants</h3>
+    <p>When a bug appears, the first question is always: is this tenant-specific or global? We added tenant ID to every log line and every trace span. Filtering by tenant in our observability stack lets us answer that question in seconds rather than minutes.</p>
+
+    <h2>Lessons</h2>
+    <p>Config-driven architecture is the most underrated scaling decision you can make. It is not glamorous. It does not make for exciting conference talks. But it is the difference between a platform that can onboard a new enterprise customer in days versus one that requires weeks of custom engineering.</p>
+
+    <p>The key insight is that most customer variation is not algorithmic&mdash;it is parametric. Customers do not need fundamentally different code. They need different values fed into the same code. Once you internalize that distinction, the architecture follows naturally: extract every axis of variation into configuration, build a robust resolution layer, and invest in tooling to manage the config lifecycle.</p>
+
+    <hr>
+
+    <p>Seven customers, one codebase, zero per-client branches. The system is not perfect&mdash;config complexity is real, operational overhead is real&mdash;but the alternative was a branching strategy that would have collapsed under its own weight by customer number four. If you are building a B2B SaaS product and you are not yet thinking about config-driven multi-tenancy, start now. The migration only gets harder.</p>
+  </div>
+</article>
+
+<footer>
+  <p>&copy; 2025 Praveen Emani. Built with vanilla HTML/CSS/JS.</p>
+</footer>
+
+<script>
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>

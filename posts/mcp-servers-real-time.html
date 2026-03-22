@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Servers: Extending LLMs with Real-Time Computation — Praveen Emani</title>
+<meta name="description" content="How Anthropic's Model Context Protocol lets you extend LLMs with deterministic, real-time computation — using AstroMCP as a case study.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0a0a0b;
+  --bg-elevated: #111113;
+  --accent: #c4f042;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #555;
+  --border: #222;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-serif: 'Newsreader', serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film grain */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+a:hover {
+  opacity: 0.8;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 11, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.nav-logo span {
+  color: var(--accent);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+.nav-links a:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ARTICLE */
+.post {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 8rem 2rem 4rem;
+}
+
+.post-back {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 3rem;
+  transition: color 0.2s;
+}
+.post-back:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.post-meta {
+  margin-bottom: 2.5rem;
+}
+
+.post-tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.post-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.post-date {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.post-body {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+}
+
+.post-body h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2.5rem 0 1rem;
+}
+
+.post-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2rem 0 0.75rem;
+}
+
+.post-body p {
+  margin-bottom: 1.25rem;
+}
+
+.post-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.post-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-elevated);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+.post-body pre {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 3px;
+}
+.post-body pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.post-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.post-body ul, .post-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.post-body li {
+  margin-bottom: 0.5rem;
+}
+
+.post-body img {
+  max-width: 100%;
+  border-radius: 3px;
+  margin: 1.5rem 0;
+}
+
+.post-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 11, 0.97);
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .hamburger {
+    display: flex;
+  }
+
+  .post {
+    padding: 6rem 1.5rem 3rem;
+  }
+  .post-title {
+    font-size: 1.6rem;
+  }
+  .post-body {
+    font-size: 1rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo">pk<span>.</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="../index.html#about">About Me</a></li>
+    <li><a href="../index.html#projects">Projects</a></li>
+    <li><a href="../index.html#blog">Blog</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- POST -->
+<article class="post">
+  <a href="../index.html#blog" class="post-back">&larr; Back to all posts</a>
+
+  <div class="post-meta">
+    <span class="post-tag">MCP / CLAUDE API</span>
+    <h1 class="post-title">MCP Servers: Extending LLMs with Real-Time Computation</h1>
+    <p class="post-date">March 2026</p>
+  </div>
+
+  <div class="post-body">
+    <p>Ask Claude where Saturn is in the sky tonight and you will get an answer. It will be articulate, confident, and wrong. Not because the model is broken, but because planetary positions change by the hour and the training data is a frozen snapshot of the past. The model has no choice but to hallucinate a plausible longitude from patterns it memorized months or years ago. This is the fundamental limitation: LLMs are extraordinary at reasoning over language, but they cannot compute. They interpolate. When the task demands a precise, real-time numerical result, interpolation is not enough.</p>
+
+    <p>This gap between what an LLM <em>knows</em> and what it can <em>calculate</em> is not a flaw to be patched with more training data. It is a category difference. And it turns out there is an elegant way to bridge it.</p>
+
+    <h2>The Model Context Protocol</h2>
+
+    <p>In late 2024, Anthropic released the <strong>Model Context Protocol</strong> (MCP) as an open standard for connecting LLMs to external tools, data sources, and services. The analogy that stuck: MCP is like USB-C for AI. Before USB-C, every device had its own proprietary connector. Before MCP, every tool integration was a bespoke piece of glue code wired into a specific application. MCP defines a universal transport layer so that any compliant server can expose capabilities to any compliant client.</p>
+
+    <p>The protocol is simple by design. An MCP server declares a set of <strong>tools</strong> with typed input schemas. A client (like Claude Desktop) discovers those tools, presents them to the language model, and the model decides when to call them based on the user's request. The server runs the computation and returns structured results. The model then interprets those results in natural language. This separation is critical: the server is deterministic, the model is expressive, and neither tries to do the other's job.</p>
+
+    <p>MCP supports multiple transports, but the simplest is <strong>stdio</strong> &mdash; the server runs as a subprocess, communicating over standard input and output via JSON-RPC. No HTTP, no ports, no authentication headaches. For local tools that need to do heavy computation, stdio is ideal.</p>
+
+    <h2>AstroMCP: A Case Study</h2>
+
+    <p>To test what MCP could do for real-time computation, I built <strong>AstroMCP</strong>: a server that gives Claude access to the Swiss Ephemeris, the same astronomical engine used by research institutions worldwide. It is backed by NASA's JPL DE441 ephemeris files, which encode planetary positions with sub-arcsecond precision across a 15,000-year span. The server exposes 12 tools over stdio transport, covering planetary positions, house systems, aspect calculations, and transit lookups.</p>
+
+    <p>The architecture is straightforward:</p>
+
+    <blockquote>
+      <p>Claude Desktop &rarr; MCP Server (Python, stdio) &rarr; Swiss Ephemeris (NASA JPL DE441)</p>
+    </blockquote>
+
+    <p>The user asks a question in natural language. Claude recognizes it needs positional data and calls the appropriate tool. The server computes the answer using the ephemeris and returns raw numerical data. Claude then weaves that data into a coherent response. At no point does Claude attempt to calculate a planetary longitude on its own.</p>
+
+    <p>I built the server using Anthropic's <strong>FastMCP SDK</strong>, which strips away the protocol boilerplate and lets you define tools as decorated Python functions with Pydantic models for input validation. Here is what a tool definition looks like in practice:</p>
+
+    <pre><code>from fastmcp import FastMCP
+from pydantic import BaseModel, Field
+
+mcp = FastMCP("AstroMCP")
+
+class PlanetPositionRequest(BaseModel):
+    planet: str = Field(
+        description="Planet name (Sun, Moon, Mars, etc.)"
+    )
+    year: int = Field(description="Year")
+    month: int = Field(ge=1, le=12, description="Month")
+    day: int = Field(ge=1, le=31, description="Day")
+    hour: float = Field(
+        default=12.0,
+        description="Hour in UTC (decimal, 0-24)"
+    )
+    zodiac: str = Field(
+        default="tropical",
+        description="Coordinate system: tropical or sidereal"
+    )
+
+@mcp.tool()
+def get_planet_position(req: PlanetPositionRequest) -&gt; dict:
+    """Get the ecliptic longitude of a planet
+    at a specific date and time."""
+    jd = compute_julian_day(
+        req.year, req.month, req.day, req.hour
+    )
+    flags = SIDEREAL_FLAG if req.zodiac == "sidereal" else 0
+    lon, lat, dist = calc_planet(req.planet, jd, flags)
+    sign, degrees, minutes = lon_to_sign(lon)
+    return {
+        "planet": req.planet,
+        "longitude": round(lon, 4),
+        "sign": sign,
+        "degrees": degrees,
+        "minutes": minutes,
+        "zodiac_system": req.zodiac
+    }</code></pre>
+
+    <p>The Pydantic schema does double duty. At runtime, it validates every input before the computation runs. At discovery time, MCP serializes the schema as JSON and sends it to Claude, so the model knows exactly what parameters each tool expects and what constraints they carry. The <code>Field</code> descriptions become part of the model's understanding of the tool.</p>
+
+    <h2>Key Design Decisions</h2>
+
+    <h3>Separation of Concerns</h3>
+    <p>The server is pure computation. It returns numbers, not narratives. Claude handles all interpretation, explanation, and conversational context. This means the server never needs to know what the user actually asked, and Claude never needs to perform arithmetic. Each component operates in its zone of competence.</p>
+
+    <h3>Dual Coordinate Systems</h3>
+    <p>Astronomy uses tropical coordinates (aligned to the vernal equinox), while Vedic and sidereal traditions use a different reference frame offset by roughly 24 degrees. Rather than building two servers, AstroMCP computes both from the same Swiss Ephemeris engine by toggling an ayanamsa correction. One tool, one codebase, two coordinate systems. The <code>zodiac</code> parameter lets Claude select the right one based on the user's context.</p>
+
+    <h3>System Prompt Engineering</h3>
+    <p>Giving Claude access to tools is not enough. Without explicit instructions, the model will sometimes blend tool-provided data with its own training knowledge, producing hybrid answers that are subtly wrong. The fix is a system prompt that constrains behavior: <em>always</em> call the tool for positional data, <em>never</em> estimate from memory, and <em>clearly state</em> when data comes from the ephemeris. This prompt engineering is as important as the server code itself. It turns tool access into tool reliance.</p>
+
+    <h2>Results</h2>
+
+    <p>The difference is not subtle. Without the MCP server, Claude's planetary position estimates are typically off by 10 to 30 degrees &mdash; the model might place Jupiter in Aries when it is actually in Taurus. With AstroMCP, positions are accurate to within 0.1 degrees of published ephemeris tables. That is the difference between a guess and a reference-grade calculation.</p>
+
+    <p>More importantly, the interaction <em>feels</em> the same to the user. They still ask questions in natural language. Claude still responds conversationally. The computation happens silently in the background. The only visible difference is that the answers are correct.</p>
+
+    <h2>When to Build an MCP Server</h2>
+
+    <p>Not every problem needs one. MCP servers make sense when the LLM needs something it structurally cannot provide on its own:</p>
+
+    <ul>
+      <li><strong>Deterministic computation</strong> &mdash; mathematical calculations, simulations, or algorithmic processing where approximate answers are not acceptable.</li>
+      <li><strong>Real-time data</strong> &mdash; stock prices, weather, sensor readings, or anything that changes faster than a model can be retrained.</li>
+      <li><strong>Domain-specific engines</strong> &mdash; physics simulators, financial models, medical dosage calculators, or any system where the logic has been validated by domain experts over decades.</li>
+      <li><strong>Authoritative lookups</strong> &mdash; querying a database, a regulatory API, or a canonical data source where the model should not guess.</li>
+    </ul>
+
+    <p>The pattern is the same every time: let the model handle language, let the server handle truth. MCP simply makes that handoff clean, discoverable, and standardized.</p>
+
+    <hr>
+
+    <p>The hallucination problem is not going away. Models will always have a training cutoff, and they will always be tempted to fill gaps with plausible fiction. But with MCP, we can selectively replace fiction with computation &mdash; routing specific questions to systems that can answer them with certainty. The model becomes an orchestrator rather than an oracle. And honestly, that is a much more useful thing to be.</p>
+  </div>
+</article>
+
+<footer>
+  <p>&copy; 2025 Praveen Emani. Built with vanilla HTML/CSS/JS.</p>
+</footer>
+
+<script>
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>

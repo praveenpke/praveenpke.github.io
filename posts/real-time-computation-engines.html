@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real-Time Computation Engines at Scale — Praveen Emani</title>
+<meta name="description" content="Building real-time computation engines that process 5M+ calculations per day across cascading dependency graphs with sub-second latency.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0a0a0b;
+  --bg-elevated: #111113;
+  --accent: #c4f042;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #555;
+  --border: #222;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-serif: 'Newsreader', serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film grain */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+a:hover {
+  opacity: 0.8;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 11, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.nav-logo span {
+  color: var(--accent);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+.nav-links a:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ARTICLE */
+.post {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 8rem 2rem 4rem;
+}
+
+.post-back {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 3rem;
+  transition: color 0.2s;
+}
+.post-back:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.post-meta {
+  margin-bottom: 2.5rem;
+}
+
+.post-tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.post-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.post-date {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.post-body {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+}
+
+.post-body h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2.5rem 0 1rem;
+}
+
+.post-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2rem 0 0.75rem;
+}
+
+.post-body p {
+  margin-bottom: 1.25rem;
+}
+
+.post-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.post-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-elevated);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+.post-body pre {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 3px;
+}
+.post-body pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.post-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.post-body ul, .post-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.post-body li {
+  margin-bottom: 0.5rem;
+}
+
+.post-body img {
+  max-width: 100%;
+  border-radius: 3px;
+  margin: 1.5rem 0;
+}
+
+.post-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 11, 0.97);
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .hamburger {
+    display: flex;
+  }
+
+  .post {
+    padding: 6rem 1.5rem 3rem;
+  }
+  .post-title {
+    font-size: 1.6rem;
+  }
+  .post-body {
+    font-size: 1rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo">pk<span>.</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="../index.html#about">About Me</a></li>
+    <li><a href="../index.html#projects">Projects</a></li>
+    <li><a href="../index.html#blog">Blog</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- POST -->
+<article class="post">
+  <a href="../index.html#blog" class="post-back">&larr; Back to all posts</a>
+
+  <div class="post-meta">
+    <span class="post-tag">DISTRIBUTED SYSTEMS / BACKEND</span>
+    <h1 class="post-title">Real-Time Computation Engines at Scale</h1>
+    <p class="post-date">March 2026</p>
+  </div>
+
+  <div class="post-body">
+    <p>Imagine you need to compute over 100 fields per entity, every 2 minutes, across more than 10,000 active entities. Now add the constraint that a single input change in one module can cascade through 5 other interdependent modules, each of which must recompute its outputs before the next one can proceed. And if any of those calculations are wrong, the consequences are not a degraded dashboard or a stale cache -- they are legal violations and safety incidents. This is the engineering reality of building real-time computation engines for high-stakes regulatory compliance.</p>
+
+    <h2>The Problem Domain</h2>
+    <p>Certain industries operate under strict regulatory frameworks where entities -- whether they are people, vehicles, assets, or operational units -- must continuously satisfy a set of quantitative rules. These rules often involve <strong>rolling time-window calculations</strong>: how much of X has this entity accumulated over the last 168 hours? Over the last 672 hours? Over the last 365 days? And critically, these thresholds are not just historical lookbacks. The system must also project forward: given the current schedule, will any entity <em>breach</em> a limit within the next 7 days?</p>
+
+    <p>Getting these numbers wrong is not an engineering inconvenience. It is a compliance failure with real-world repercussions -- fines, grounded operations, or worse. The system cannot afford eventual consistency. It needs to be correct, and it needs to be correct <em>now</em>.</p>
+
+    <h2>Engine Architecture: Six Modules, One Dependency Graph</h2>
+    <p>The computation engine is structured as <strong>6 distinct modules</strong>, each responsible for a category of calculations. The modules are not independent -- they form a directed acyclic graph of dependencies.</p>
+
+    <pre><code>Module A: Raw input aggregation (time-window rollups)
+Module B: Derived limits (depends on A)
+Module C: Threshold evaluation (depends on A + B)
+Module D: Exception handling (depends on C)
+Module E: Forward projection (depends on A + B + D)
+Module F: Compliance status (depends on all above)</code></pre>
+
+    <p>When a new input arrives -- say, a schedule change or a recorded activity event -- the engine determines which module is affected and triggers a <strong>targeted recomputation</strong> through the dependency chain. Module F always runs last, producing the final compliance verdict for the entity. This architecture means the engine is not a flat batch job. It is a reactive pipeline where the depth of recomputation depends on where the change enters the graph.</p>
+
+    <h3>Why Not Microservices?</h3>
+    <p>The tight coupling between modules is intentional. These calculations share intermediate state, and the cost of serializing and deserializing that state across service boundaries would destroy latency. The engine runs as a single deployable unit with clear internal module boundaries -- a <strong>modular monolith</strong> optimized for computational throughput rather than independent deployability.</p>
+
+    <h2>Cascading Dependency Resolution</h2>
+    <p>The naive approach to handling a change is simple: recompute everything. With 100+ fields across 6 modules, this is wasteful. The engine instead maintains a <strong>dependency map</strong> at the field level. Each computed field declares which inputs and upstream fields it depends on. When an input changes, the engine walks this map to determine the minimal set of fields that need recomputation.</p>
+
+    <blockquote>
+      <p>The goal is not to be fast by skipping work. It is to be fast by knowing exactly which work matters.</p>
+    </blockquote>
+
+    <p>This is implemented as a topological sort over the dependency graph. Changed inputs are flagged, and only fields reachable from those inputs are marked dirty. The engine then recomputes dirty fields in dependency order. In practice, a typical input change touches 15-30% of the total field set, saving significant compute on every cycle.</p>
+
+    <h2>Rolling Time-Window Calculations</h2>
+    <p>Three distinct time windows drive most of the regulatory logic: <strong>168-hour</strong> (7-day), <strong>672-hour</strong> (28-day), and <strong>365-day</strong> windows. These are not calendar-aligned -- they are true rolling windows measured from the current timestamp.</p>
+
+    <p>The challenge with rolling windows is that they invalidate passively. Even if no new input arrives, the passage of time itself changes the calculation as old events fall off the trailing edge of the window. The engine handles this with a <strong>scheduled tick</strong> -- every 2 minutes, it re-evaluates all active entities, even if no new inputs have arrived. This tick ensures that time-based expirations are caught promptly rather than only when the next input happens to trigger a recomputation.</p>
+
+    <p>For efficiency, the engine pre-indexes events by their expiration timestamp. Rather than scanning the full event history on each tick, it checks which events have recently fallen outside each window boundary and adjusts the running aggregates incrementally.</p>
+
+    <h2>The Predictive Layer</h2>
+    <p>Historical compliance is only half the problem. Operators need to know: <em>if we proceed with the current plan, will we violate any rules in the next 7 days?</em> The engine answers this by running the same computation pipeline against <strong>forward-projected schedules</strong>.</p>
+
+    <p>This is not a separate system or a simplified approximation. It is the same engine, the same modules, the same dependency graph -- but fed with scheduled future events instead of recorded past events. The predictive layer iterates day-by-day through the forward window, evaluating compliance status at each projected point. This guarantees that the predictive output is <strong>consistent with the historical calculation logic</strong>, eliminating the drift that inevitably occurs when prediction and evaluation are implemented separately.</p>
+
+    <h2>Config-Driven Rule Overrides</h2>
+    <p>Not every entity operates under the same rules. Different customers, jurisdictions, or operational contexts may apply different thresholds, different window sizes, or different exception criteria. The engine supports this through a <strong>configuration layer</strong> that parameterizes every rule.</p>
+
+    <pre><code>{
+  "rule_set": "standard_v2",
+  "overrides": {
+    "window_168h_max": 60,
+    "window_672h_max": 190,
+    "exception_credits": true,
+    "forward_projection_days": 7
+  }
+}</code></pre>
+
+    <p>Rule overrides are resolved at computation time by merging the base rule set with customer-specific overrides. This keeps the computation code path singular -- there are no <code>if (customer === X)</code> branches. The same engine code handles all customers, parameterized entirely by configuration. This design decision pays dividends in testability: every code path is exercised regardless of which customer configuration triggers it.</p>
+
+    <h2>Performance Profile</h2>
+    <p>At steady state, the engine processes approximately <strong>5 million calculations per day</strong>. The P95 engine latency -- measured from input receipt to final compliance status output -- is <strong>under 800 milliseconds</strong>. The 2-minute tick cycle means that in the worst case, a newly recorded event is reflected in compliance status within 2 minutes and 800 milliseconds.</p>
+
+    <p>The performance budget is tight but not extreme. The real constraint is not raw speed but <strong>consistency under load</strong>. During peak periods -- shift changes, bulk schedule uploads, system-wide recalculations -- the engine must maintain the same latency guarantees. This is achieved through careful work partitioning: entities are sharded across computation workers, and each worker processes its assigned entities sequentially, avoiding contention on shared state.</p>
+
+    <h2>Testing as a First-Class Concern</h2>
+    <p>In most systems, 80% test coverage is considered thorough. In a computation engine where incorrect output has legal consequences, <strong>95-100% coverage is the floor, not the ceiling</strong>. Every edge case -- window boundary crossings, overlapping events, exception stacking, timezone transitions, leap seconds -- has dedicated test cases.</p>
+
+    <p>The test suite is enforced via <strong>pre-commit hooks</strong>. No code merges without passing the full computation test battery. This is not a CI nicety -- it is a hard gate. The test suite includes:</p>
+    <ul>
+      <li><strong>Unit tests</strong> for every individual field calculation across all 6 modules</li>
+      <li><strong>Integration tests</strong> that verify cascading recomputation produces correct end-to-end results</li>
+      <li><strong>Regression tests</strong> built from real-world incidents where edge cases were discovered in production</li>
+      <li><strong>Property-based tests</strong> that verify invariants like "forward projection must never be more permissive than historical evaluation"</li>
+    </ul>
+
+    <p>The cost of this test suite is significant -- it adds minutes to every commit. The cost of not having it is measured in compliance incidents.</p>
+
+    <h2>Lessons Learned</h2>
+
+    <h3>Optimize for Correctness First</h3>
+    <p>In high-stakes computation, the temptation to optimize for speed is constant. But a fast wrong answer is worse than a slow right one. The engine's architecture prioritizes <strong>auditability and determinism</strong> over raw throughput. Every computation can be traced back to its inputs. Every intermediate value is logged. When a regulator asks "why did you compute this value?", the system can produce a complete derivation chain.</p>
+
+    <h3>Exhaustive Testing Pays Compound Interest</h3>
+    <p>The upfront investment in comprehensive test coverage has a compounding return. Every new feature or rule change can be implemented with confidence that it does not break existing calculations. Engineers who join the team can make changes on day one because the test suite catches mistakes that would otherwise require years of domain knowledge to spot.</p>
+
+    <h3>Configuration Over Code Branching</h3>
+    <p>The decision to make rules config-driven rather than code-branched was one of the highest-leverage architectural choices. It reduced the combinatorial explosion of customer-specific code paths and made the engine testable with a single, unified test suite rather than per-customer test matrices.</p>
+
+    <hr>
+
+    <p>Building real-time computation engines for regulated domains is an exercise in disciplined engineering. The patterns are not novel -- dependency graphs, incremental computation, rolling aggregates, config-driven behavior. What makes the work hard is the margin for error: zero. When the system says an entity is compliant, it must be right. When it predicts a future violation, it must be trustworthy. The architecture, the testing strategy, and the operational discipline all serve that single constraint. Correctness is the feature.</p>
+  </div>
+</article>
+
+<footer>
+  <p>&copy; 2025 Praveen Emani. Built with vanilla HTML/CSS/JS.</p>
+</footer>
+
+<script>
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>
