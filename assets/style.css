@@ -14,7 +14,7 @@
 
 /* ---- themes (dark is the site default; light kept for flexibility) ---- */
 body.dark, body.light {
-  --bg: #0a0a0a;
+  --bg: #1f1e1e;
   --fg: #ffffff;
   --muted: rgba(255,255,255,.72);
   --soft: rgba(255,255,255,.6);
@@ -22,18 +22,25 @@ body.dark, body.light {
   --faint: rgba(255,255,255,.4);
   --line: rgba(255,255,255,.10);
   --line-2: rgba(255,255,255,.16);
-  --line-strong: rgba(255,255,255,.32);
-  --card: #111114;
-  --card-hover: #15151a;
-  --code-bg: #16161b;
+  --line-strong: rgba(255,255,255,.34);
+  --card: #2a2829;
+  --card-hover: #312f30;
+  --code-bg: #2a2829;
   --accent: #ffffff;
-  --nav-bg: rgba(10,10,10,.72);
-  --sel-bg: #ffffff; --sel-fg: #0a0a0a;
+  --nav-bg: rgba(31,30,30,.72);
+  --sel-bg: #ffffff; --sel-fg: #1f1e1e;
 }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 50% -8%, rgba(255,255,255,.06), transparent 55%),
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: auto, 58px 58px, 58px 58px;
+  background-repeat: no-repeat, repeat, repeat;
+  background-attachment: fixed;
   color: var(--fg);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -87,12 +94,7 @@ img { display: block; max-width: 100%; }
    ============================================================ */
 .landing {
   position: relative; height: 100svh; display: flex; flex-direction: column; overflow: hidden;
-  background-color: #0a0a0a; color: #fff;
-  background-image:
-    radial-gradient(circle at 50% -10%, rgba(255,255,255,.07), transparent 55%),
-    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
-  background-size: auto, 58px 58px, 58px 58px;
+  color: #fff;
 }
 .landing .nav { flex-shrink: 0; justify-content: flex-end; padding: 22px clamp(20px,5vw,64px); }
 
@@ -130,8 +132,7 @@ img { display: block; max-width: 100%; }
 /* ============================================================
    INNER PAGE SHELL
    ============================================================ */
-.page { position: relative; width: 100%; min-height: 100svh; overflow-x: hidden; background-image: radial-gradient(circle at 50% -8%, rgba(255,255,255,.06), transparent 55%); }
-.page.dark { background-image: radial-gradient(circle at 50% -8%, rgba(255,255,255,.06), transparent 55%); }
+.page { position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100svh; overflow-x: hidden; }
 
 .section { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(20px,5vw,64px) clamp(80px,12vh,160px); }
 .eyebrow { font-family: var(--mono); font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
@@ -162,9 +163,9 @@ img { display: block; max-width: 100%; }
    ============================================================ */
 .work-layout {
   max-width: var(--maxw); margin: 0 auto;
-  padding: clamp(80px,14vh,150px) clamp(20px,5vw,64px) clamp(80px,12vh,160px);
-  display: grid; grid-template-columns: minmax(0,1fr) 360px;
-  gap: clamp(32px,5vw,72px); align-items: start;
+  padding: clamp(52px,9vh,96px) clamp(20px,5vw,64px) clamp(48px,8vh,90px);
+  display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,0.92fr) minmax(0,0.92fr);
+  gap: clamp(24px,3.2vw,48px); align-items: start;
 }
 .work-main { min-width: 0; }
 .col-head { margin-bottom: clamp(24px,4vh,40px); }
@@ -186,9 +187,8 @@ img { display: block; max-width: 100%; }
 .tl-item li::before { content: ""; position: absolute; left: 0; top: .58em; width: 5px; height: 5px; border-radius: 1px; background: var(--accent); }
 .tl-item li strong { font-weight: 600; }
 
-/* sticky aside panels */
-.work-aside { position: sticky; top: 82px; display: flex; flex-direction: column; gap: 16px; }
-.panel { border: 1px solid var(--line); border-radius: 16px; padding: clamp(20px,2.2vw,26px); background: var(--card); }
+/* skill / credential panels (grid columns beside the timeline) */
+.panel { border: 1px solid var(--line); border-radius: 16px; padding: clamp(18px,1.8vw,24px); background: var(--card); }
 .panel-title { display: flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
 .panel-title .mk { color: var(--accent); }
 .frow { display: flex; gap: 13px; padding: 16px 0; border-top: 1px solid var(--line); }
@@ -201,9 +201,13 @@ img { display: block; max-width: 100%; }
 .frow .title { font-size: 14px; font-weight: 500; color: var(--fg); line-height: 1.4; }
 .frow .meta { font-size: 12.5px; color: var(--dim); margin-top: 3px; }
 
-@media (max-width: 900px) {
-  .work-layout { grid-template-columns: 1fr; gap: clamp(40px,7vh,64px); }
-  .work-aside { position: static; }
+@media (max-width: 1000px) {
+  .work-layout { grid-template-columns: 1fr 1fr; gap: clamp(24px,4vw,40px); }
+  .work-main { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .work-layout { grid-template-columns: 1fr; }
+  .work-main { grid-column: auto; }
 }
 
 /* ============================================================
@@ -235,7 +239,8 @@ img { display: block; max-width: 100%; }
 /* ============================================================
    FOOTER
    ============================================================ */
-.foot { max-width: var(--maxw); margin: 0 auto; padding: 32px clamp(20px,5vw,64px) 48px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+.foot { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 32px clamp(20px,5vw,64px) 40px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+.page > .foot { margin-top: auto; }
 .foot .mono { font-family: var(--mono); font-size: 12px; color: var(--dim); }
 .foot .links { display: flex; gap: 24px; }
 .foot .links a { font-family: var(--mono); font-size: 12.5px; color: var(--soft); text-decoration: none; }
