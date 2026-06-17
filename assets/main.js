@@ -72,34 +72,28 @@
 
     show(avatar, 60); show(kicker, 200); show(h1, 340);
 
-    function esc(c) { return c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c; }
     function typeLead(el, done) {
-      var flat = [];
+      var parts = [];
       Array.prototype.forEach.call(el.childNodes, function (n) {
-        var b = n.nodeName === "B", t = n.textContent || "";
-        for (var i = 0; i < t.length; i++) flat.push([t[i], b]);
+        parts.push({ text: n.textContent || "", bold: n.nodeName === "B" });
       });
       el.innerHTML = ""; el.style.visibility = "visible";
-      var typed = [], idx = 0;
-      function render() {
-        var html = "", open = false;
-        for (var k = 0; k < typed.length; k++) {
-          var b = typed[k][1];
-          if (b && !open) { html += "<b>"; open = true; }
-          else if (!b && open) { html += "</b>"; open = false; }
-          html += esc(typed[k][0]);
-        }
-        if (open) html += "</b>";
-        el.innerHTML = html + '<span class="cursor"></span>';
-      }
+      var nodes = parts.map(function (p) {
+        var tn = document.createTextNode("");
+        if (p.bold) { var b = document.createElement("b"); b.appendChild(tn); el.appendChild(b); }
+        else el.appendChild(tn);
+        return { tn: tn, text: p.text };
+      });
+      var cursor = document.createElement("span"); cursor.className = "cursor"; el.appendChild(cursor);
+      var si = 0, ci = 0;
       (function tick() {
-        if (idx >= flat.length) {
-          el.innerHTML = el.innerHTML.replace('<span class="cursor"></span>', "");
-          if (done) done(); return;
-        }
-        typed.push(flat[idx]); idx++; render();
-        var c = flat[idx - 1][0];
-        var d = c === " " ? 26 : /[.,—–]/.test(c) ? 120 : (15 + Math.random() * 22);
+        if (si >= nodes.length) { if (cursor.parentNode) cursor.parentNode.removeChild(cursor); if (done) done(); return; }
+        var nd = nodes[si];
+        if (ci >= nd.text.length) { si++; ci = 0; tick(); return; }
+        nd.tn.data += nd.text.charAt(ci); ci++;
+        el.appendChild(cursor);                       // keep caret at the end
+        var ch = nd.text.charAt(ci - 1);
+        var d = ch === " " ? 50 : /[.,—–]/.test(ch) ? 260 : 40;   // steady, readable cadence
         setTimeout(tick, d);
       })();
     }
@@ -134,7 +128,7 @@
     var ctx = canvas.getContext("2d");
     var G = 58, STEP = 116, SPEED = 1.4, W = 0, H = 0, dpr = 1;
     var DIRV = [[1, 0], [0, 1], [-1, 0], [0, -1]];   // right, down, left, up
-    var L, R, T, B, dir, x, y;
+    var L, R, T, B, dir, x, y, trail = [], TRAIL = 90;
 
     function reset() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -144,7 +138,7 @@
       L = G; T = G;
       R = Math.max(L + STEP, Math.floor((W - G) / G) * G);
       B = Math.max(T + STEP, Math.floor((H - G) / G) * G);
-      dir = 0; x = L; y = T;
+      dir = 0; x = L; y = T; trail = [];
     }
     reset();
     window.addEventListener("resize", reset, { passive: true });
@@ -159,10 +153,7 @@
     }
 
     function frame() {
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = "rgba(0,0,0,0.045)";
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = "source-over";
+      ctx.clearRect(0, 0, W, H);   // full clear each frame → no residual ghost trail
 
       x += DIRV[dir][0] * SPEED; y += DIRV[dir][1] * SPEED;
 
@@ -172,8 +163,11 @@
       else if (dir === 2 && x <= L) { x = L; reached = true; }
       else if (dir === 3 && y <= T) { y = T; reached = true; }
 
-      ctx.fillStyle = "rgba(255,77,61,0.6)";
-      ctx.beginPath(); ctx.arc(x, y, 1.7, 0, Math.PI * 2); ctx.fill();
+      trail.push([x, y]); if (trail.length > TRAIL) trail.shift();
+      for (var i = 0; i < trail.length; i++) {
+        ctx.fillStyle = "rgba(255,77,61," + (0.55 * (i + 1) / trail.length).toFixed(3) + ")";
+        ctx.beginPath(); ctx.arc(trail[i][0], trail[i][1], 1.7, 0, Math.PI * 2); ctx.fill();
+      }
 
       rover.style.transform = "translate(" + x + "px," + y + "px) rotate(" + (dir * 90) + "deg)";
 
