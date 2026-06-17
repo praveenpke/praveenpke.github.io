@@ -221,7 +221,7 @@ img { display: block; max-width: 100%; }
 /* ============================================================
    ARTICLE / POST
    ============================================================ */
-.post { max-width: 800px; margin: 0 auto; padding: clamp(48px,9vh,110px) clamp(20px,5vw,44px) clamp(70px,11vh,140px); }
+.post { max-width: 880px; margin: 0 auto; padding: clamp(48px,9vh,110px) clamp(20px,5vw,44px) clamp(70px,11vh,140px); }
 .post-back { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 13px; color: var(--soft); text-decoration: none; margin-bottom: 48px; }
 .post-back:hover { color: var(--fg); }
 .post-meta { margin-bottom: 48px; }
