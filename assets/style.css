@@ -76,8 +76,9 @@ img { display: block; max-width: 100%; }
 /* grid rover */
 .rover-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .rover-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.rover { position: absolute; top: 0; left: 0; width: 27px; height: 27px; margin: -13px 0 0 -13px; color: rgba(255,255,255,.9); filter: drop-shadow(0 2px 5px rgba(0,0,0,.55)); }
+.rover { position: absolute; top: 0; left: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; color: #ff4d3d; filter: drop-shadow(0 0 8px rgba(255,77,61,.6)); }
 .rover svg { width: 100%; height: 100%; display: block; }
+.avail-rot { display: inline-block; border-right: 1.5px solid var(--accent); padding-right: 2px; animation: blink 1.05s steps(1) infinite; }
 .landing .nav, .landing .hero { position: relative; z-index: 2; }
 @media (prefers-reduced-motion: reduce) { .rover-layer { display: none; } }
 @media (prefers-reduced-motion: reduce) {
