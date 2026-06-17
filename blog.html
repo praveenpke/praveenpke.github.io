@@ -1,250 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blog — Praveen Emani</title>
-<meta name="description" content="Writing on AI infrastructure, distributed systems, and engineering.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --bg: #FAF8F4;
-  --surface: #FFFFFF;
-  --border: #E8E1D8;
-  --border-light: #F0EBE3;
-  --accent: #B4572A;
-  --accent-soft: #FDF3EB;
-  --text: #1C1917;
-  --muted: #78716C;
-  --dim: #A8A29E;
-  --serif: 'Cormorant', serif;
-  --sans: 'Figtree', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
-}
-
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  padding-top: 56px;
-}
-::selection { background: var(--accent); color: #fff; }
-a { color: var(--accent); text-decoration: none; }
-
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  height: 56px;
-  background: rgba(255,251,245,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-}
-.nav-inner {
-  max-width: 720px; margin: 0 auto;
-  height: 100%; padding: 0 1.5rem;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.nav-brand {
-  font-family: var(--serif);
-  font-size: 1.2rem; font-weight: 600; color: var(--text);
-}
-.nav-links { display: flex; gap: 2rem; }
-.nav-links a {
-  color: var(--muted); font-size: 0.82rem; font-weight: 500;
-  transition: color 0.25s;
-}
-.nav-links a:hover { color: var(--text); }
-.nav-links a.active { color: var(--accent); }
-
-.content {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 3rem 1.5rem;
-}
-
-.page-title {
-  font-family: var(--serif);
-  font-size: 2.2rem;
-  font-weight: 500;
-  margin-bottom: 0.35rem;
-}
-.page-subtitle {
-  color: var(--muted);
-  font-size: 0.95rem;
-  margin-bottom: 2.5rem;
-}
-
-/* Blog list view */
-.post-list { list-style: none; }
-
-.post-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 1.15rem 0;
-  border-bottom: 1px solid var(--border-light);
-  gap: 1.5rem;
-  transition: padding-left 0.25s;
-}
-.post-item:first-child { border-top: 1px solid var(--border-light); }
-.post-item:hover { padding-left: 0.5rem; }
-
-.post-title {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--text);
-  transition: color 0.2s;
-}
-.post-item:hover .post-title { color: var(--accent); }
-
-.post-tag {
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--dim);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 0.2rem;
-}
-
-.post-date {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--dim);
-  white-space: nowrap;
-}
-
-/* Empty state */
-.empty {
-  text-align: center;
-  padding: 4rem 2rem;
-  border: 1.5px dashed var(--border);
-  border-radius: 14px;
-}
-.empty i {
-  display: block; font-style: normal;
-  font-size: 1.5rem; opacity: 0.2;
-  margin-bottom: 0.75rem;
-}
-.empty p {
-  font-family: var(--serif);
-  font-style: italic;
-  color: var(--dim);
-  font-size: 1.05rem;
-}
-
-footer {
-  max-width: 720px;
-  margin: 0 auto;
-  text-align: center;
-  padding: 2rem 1.5rem;
-  font-size: 0.7rem;
-  color: var(--dim);
-  border-top: 1px solid var(--border-light);
-}
-
-.nav-toggle {
-  display: none; background: none; border: none; cursor: pointer;
-  padding: 6px; flex-direction: column; gap: 5px;
-}
-.nav-toggle span {
-  display: block; width: 20px; height: 1.5px; background: var(--text);
-  transition: transform 0.25s;
-}
-.nav-toggle.on span:first-child { transform: rotate(45deg) translate(2.5px, 4.5px); }
-.nav-toggle.on span:last-child { transform: rotate(-45deg) translate(2.5px, -4.5px); }
-
-@media (max-width: 640px) {
-  .nav-links {
-    position: fixed; top: 56px; left: 0; right: 0;
-    background: rgba(255,251,245,0.97);
-    backdrop-filter: blur(16px);
-    flex-direction: column;
-    padding: 1.25rem 1.5rem; gap: 0.85rem;
-    border-bottom: 1px solid var(--border);
-    transform: translateY(-120%); opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    pointer-events: none;
-  }
-  .nav-links.open {
-    transform: translateY(0); opacity: 1; pointer-events: all;
-  }
-  .nav-toggle { display: flex; }
-  .post-item { flex-direction: column; gap: 0.2rem; }
-}
-</style>
+<title>Writing — Praveen Emani</title>
+<meta name="description" content="Writing by Praveen Emani on agentic AI, multi-agent systems, RAG, evaluation, and distributed systems.">
+<link rel="canonical" href="https://praveenpke.github.io/blog.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://praveenpke.github.io/blog.html">
+<meta property="og:title" content="Writing — Praveen Emani">
+<meta property="og:description" content="Writing on agentic AI, multi-agent systems, RAG, evaluation, and distributed systems.">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/35184782?v=4">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/assets/style.css">
+<script>
+(function(){try{var t=localStorage.getItem("theme");if(!t){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
 </head>
 <body>
 
-<nav>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-brand">Praveen Emani</a>
-    <div class="nav-links" id="navLinks">
-      <a href="/">Home</a>
-      <a href="/blog.html" class="active">Blog</a>
-      <a href="/#projects">Projects</a>
-      <a href="/#contact">Contact</a>
+    <a href="/" class="nav-brand">Praveen Emani<span class="dot">.</span></a>
+    <div class="nav-menu">
+      <ul class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#experience">Experience</a></li>
+        <li><a href="/#work">Work</a></li>
+        <li><a href="/blog.html" class="active">Writing</a></li>
+      </ul>
+      <button class="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+      </button>
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu">
-      <span></span><span></span>
-    </button>
   </div>
-</nav>
+</header>
 
-<div class="content">
-  <h1 class="page-title">Blog</h1>
-  <p class="page-subtitle">Thoughts on AI infrastructure, distributed systems, and engineering.</p>
+<main id="main">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Writing</h1>
+      <p>Notes on agentic AI, multi-agent systems, RAG, evaluation, and the distributed-systems foundations underneath.</p>
+    </div>
 
-  <ul class="post-list">
-    <li class="post-item">
-      <div>
-        <a href="/posts/multi-agent-langgraph.html" class="post-title">Building Multi-Agent Systems with LangGraph</a>
-        <p class="post-tag">LangGraph &middot; AI Infrastructure</p>
-      </div>
-      <span class="post-date">2026</span>
-    </li>
-    <li class="post-item">
-      <div>
-        <a href="/posts/mcp-servers-real-time.html" class="post-title">MCP Servers: Extending LLMs with Real-Time Computation</a>
-        <p class="post-tag">MCP &middot; Claude API</p>
-      </div>
-      <span class="post-date">2026</span>
-    </li>
-    <li class="post-item">
-      <div>
-        <a href="/posts/real-time-computation-engines.html" class="post-title">Real-Time Computation Engines at Scale</a>
-        <p class="post-tag">Distributed Systems &middot; Backend</p>
-      </div>
-      <span class="post-date">2026</span>
-    </li>
-    <li class="post-item">
-      <div>
-        <a href="/posts/multi-tenant-saas.html" class="post-title">Multi-Tenant SaaS: One Codebase, Seven Customers</a>
-        <p class="post-tag">Architecture &middot; SaaS</p>
-      </div>
-      <span class="post-date">2026</span>
-    </li>
-  </ul>
-</div>
+    <ul class="post-list">
+      <li class="post-row">
+        <div>
+          <a class="post-title" href="/posts/multi-agent-langgraph.html">Building Multi-Agent Systems with LangGraph</a>
+          <div class="post-tag">LangGraph · Agentic AI</div>
+        </div>
+        <span class="post-date">2026</span>
+      </li>
+      <li class="post-row">
+        <div>
+          <a class="post-title" href="/posts/mcp-servers-real-time.html">MCP Servers: Extending LLMs with Real-Time Computation</a>
+          <div class="post-tag">MCP · Tool Calling</div>
+        </div>
+        <span class="post-date">2026</span>
+      </li>
+      <li class="post-row">
+        <div>
+          <a class="post-title" href="/posts/real-time-computation-engines.html">Real-Time Computation Engines at Scale</a>
+          <div class="post-tag">Distributed Systems · Backend</div>
+        </div>
+        <span class="post-date">2026</span>
+      </li>
+      <li class="post-row">
+        <div>
+          <a class="post-title" href="/posts/multi-tenant-saas.html">Multi-Tenant SaaS: One Codebase, Seven Customers</a>
+          <div class="post-tag">Architecture · SaaS</div>
+        </div>
+        <span class="post-date">2026</span>
+      </li>
+    </ul>
+  </div>
+</main>
 
-<footer>&copy; 2026 Praveen Emani</footer>
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <span class="mono">© 2026 Praveen Emani</span>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="https://github.com/praveenpke" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/praveenkemani/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</footer>
 
-<script>
-const t = document.getElementById('navToggle');
-const l = document.getElementById('navLinks');
-t.addEventListener('click', () => { t.classList.toggle('on'); l.classList.toggle('open'); });
-l.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-  t.classList.remove('on'); l.classList.remove('open');
-}));
-</script>
-
+<script defer src="/assets/main.js"></script>
 </body>
 </html>

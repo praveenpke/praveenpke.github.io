@@ -1,961 +1,283 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Praveen Emani</title>
-<meta name="description" content="Senior Software Engineer building at the intersection of distributed systems and AI infrastructure.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;0,700&family=Figtree:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+<title>Praveen Emani — Senior Software Engineer · Agentic AI</title>
+<meta name="description" content="Praveen Emani — Senior Software Engineer building production agentic-AI systems: multi-agent orchestration (LangGraph), RAG, evaluation, and guardrails. 7+ years in AI/ML and distributed systems.">
+<link rel="canonical" href="https://praveenpke.github.io/">
 
-:root {
-  --bg: #FAF8F4;
-  --surface: #FFFFFF;
-  --border: #E8E1D8;
-  --border-light: #F0EBE3;
-  --accent: #B4572A;
-  --accent-light: #D4784E;
-  --accent-soft: #FDF3EB;
-  --accent-glow: rgba(180, 87, 42, 0.06);
-  --text: #1C1917;
-  --muted: #78716C;
-  --dim: #A8A29E;
-  --serif: 'Cormorant', serif;
-  --sans: 'Figtree', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
-}
+<!-- Open Graph / Twitter -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://praveenpke.github.io/">
+<meta property="og:title" content="Praveen Emani — Senior Software Engineer · Agentic AI">
+<meta property="og:description" content="Building production agentic-AI systems: multi-agent orchestration, RAG, evaluation, and guardrails. 7+ years in AI/ML and distributed systems.">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/35184782?v=4">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Praveen Emani — Senior Software Engineer · Agentic AI">
+<meta name="twitter:description" content="Building production agentic-AI systems: multi-agent orchestration, RAG, evaluation, and guardrails.">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/35184782?v=4">
 
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  padding-top: 60px;
-}
-::selection { background: var(--accent); color: #fff; }
-a { color: var(--accent); text-decoration: none; }
+<link rel="stylesheet" href="/assets/style.css">
+<script>
+/* set theme before paint to avoid flash */
+(function(){try{var t=localStorage.getItem("theme");if(!t){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
 
-/* ═══ ANIMATIONS ═══ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.tab-panel.active .about-left { animation: fadeUp 0.6s ease both; }
-.tab-panel.active .about-right { animation: fadeUp 0.6s 0.15s ease both; }
-.tab-panel.active .tile-grid { animation: fadeUp 0.5s ease both; }
-
-/* ═══ NAV ═══ */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  height: 60px;
-  background: rgba(250, 248, 244, 0.88);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 2rem;
-}
-
-.nav-brand {
-  position: absolute;
-  left: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.nav-avatar {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif);
-  font-size: 1rem;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(180, 87, 42, 0.25);
-}
-.nav-brand-name {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.nav-social {
-  position: absolute;
-  right: 2rem;
-  display: flex;
-  gap: 0.35rem;
-}
-.nav-social a {
-  color: var(--muted);
-  display: flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-.nav-social a:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
-  opacity: 1;
-  transform: translateY(-1px);
-}
-.nav-social a svg { width: 20px; height: 20px; }
-
-.nav-tabs {
-  display: flex;
-  gap: 0.25rem;
-}
-.nav-tabs a {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--muted);
-  padding: 0.42rem 1.35rem;
-  border-radius: 8px;
-  transition: all 0.25s ease;
-  position: relative;
-}
-.nav-tabs a:hover {
-  color: var(--text);
-  opacity: 1;
-}
-.nav-tabs a.active {
-  color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: 0 1px 4px rgba(180, 87, 42, 0.1);
-}
-
-/* ═══ CONTENT ═══ */
-.content {
-  max-width: 1020px;
-  margin: 0 auto;
-  padding: 3rem clamp(1.5rem, 3.5vw, 2.75rem);
-}
-
-.tab-panel {
-  display: none;
-}
-.tab-panel.active {
-  display: block;
-}
-
-/* ═══ ABOUT ═══ */
-.about-layout {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 4rem;
-  align-items: start;
-}
-
-.about-left {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-}
-
-/* Photo with decorative accents */
-.about-photo-container {
-  position: relative;
-  width: 100%;
-  padding: 12px;
-}
-.about-photo-container::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 80px;
-  height: 80px;
-  border-radius: 16px 16px 16px 4px;
-  background: var(--accent);
-  opacity: 0.15;
-  animation: scaleIn 0.8s 0.3s ease both;
-}
-.about-photo-container::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: -4px;
-  width: 60px;
-  height: 60px;
-  border-radius: 4px 16px 16px 16px;
-  background: var(--accent);
-  opacity: 0.1;
-  animation: scaleIn 0.8s 0.5s ease both;
-}
-.about-photo-accent {
-  position: absolute;
-  bottom: 30px;
-  right: -10px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.2;
-  animation: scaleIn 0.6s 0.7s ease both;
-}
-.about-photo-wrap {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(28, 25, 23, 0.08), 0 2px 8px rgba(28, 25, 23, 0.04);
-}
-.about-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.6s ease;
-}
-.about-photo-wrap:hover .about-photo {
-  transform: scale(1.03);
-}
-
-.about-details {
-  display: flex;
-  flex-direction: column;
-  gap: 1.4rem;
-}
-
-.about-section-label {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--accent);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.about-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-.about-tags span {
-  font-size: 0.76rem;
-  color: var(--muted);
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  padding: 0.25rem 0.65rem;
-  border-radius: 6px;
-  font-weight: 400;
-  transition: all 0.25s ease;
-}
-.about-tags span:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.about-buttons {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-.view-projects-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--accent);
-  padding: 0.7rem 1.5rem;
-  border-radius: 9px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(180, 87, 42, 0.2);
-}
-.view-projects-btn:hover {
-  background: #9a4a23;
-  color: #fff;
-  gap: 0.6rem;
-  opacity: 1;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(180, 87, 42, 0.3);
-}
-.contact-btn {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--accent);
-  background: transparent;
-  border: 1.5px solid var(--accent);
-  padding: 0.65rem 1.4rem;
-  border-radius: 9px;
-  transition: all 0.3s ease;
-}
-.contact-btn:hover {
-  background: var(--accent-soft);
-  opacity: 1;
-  transform: translateY(-2px);
-}
-
-.about-right {
-  padding-top: 0.25rem;
-}
-
-.about-tagline {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--accent);
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.about-tagline::before {
-  content: '';
-  width: 24px;
-  height: 1.5px;
-  background: var(--accent);
-}
-
-.about-name {
-  font-family: var(--serif);
-  font-size: 2.6rem;
-  font-weight: 700;
-  margin-bottom: 0.15rem;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-.about-name-accent {
-  color: var(--accent);
-}
-
-.about-role {
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  color: var(--muted);
-  font-weight: 400;
-  margin-bottom: 1.5rem;
-}
-
-.about-bio {
-  font-size: 0.95rem;
-  color: var(--muted);
-  line-height: 1.8;
-  margin-bottom: 2.75rem;
-  max-width: 520px;
-}
-
-/* Timeline */
-.timeline {
-  position: relative;
-  padding-left: 2rem;
-}
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 8px;
-  bottom: 8px;
-  width: 1.5px;
-  background: linear-gradient(to bottom, var(--accent), var(--border));
-}
-
-.timeline-item {
-  position: relative;
-  padding-bottom: 2rem;
-  transition: transform 0.2s ease;
-}
-.timeline-item:last-child {
-  padding-bottom: 0;
-}
-.timeline-item:hover {
-  transform: translateX(4px);
-}
-
-.timeline-dot {
-  position: absolute;
-  left: -2rem;
-  top: 6px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 2px solid var(--accent);
-  transition: all 0.25s ease;
-}
-.timeline-item:first-child .timeline-dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-.timeline-item:hover .timeline-dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-.timeline-date {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--dim);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.timeline-title {
-  font-family: var(--serif);
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0.2rem 0 0.12rem;
-}
-
-.timeline-desc {
-  font-size: 0.82rem;
-  color: var(--accent);
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-
-.timeline-detail {
-  font-size: 0.8rem;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-/* ═══ GRID ═══ */
-.tile-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-}
-
-.tile {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.5rem 1.4rem;
-  transition: all 0.35s ease;
-  display: flex;
-  flex-direction: column;
-  min-height: 180px;
-}
-.tile:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
-  border-color: var(--accent);
-}
-
-.tile-label {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  font-weight: 500;
-  margin-bottom: 0.35rem;
-}
-.tile h3 {
-  font-family: var(--serif);
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.45rem;
-}
-.tile p {
-  font-size: 0.85rem;
-  color: var(--muted);
-  line-height: 1.6;
-  margin-bottom: 0.75rem;
-  flex: 1;
-}
-.tile-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-bottom: 0.7rem;
-}
-.tile-tags span {
-  font-size: 0.7rem;
-  color: var(--dim);
-  background: var(--accent-soft);
-  padding: 0.18rem 0.55rem;
-  border-radius: 5px;
-}
-.tile a.tile-link {
-  font-size: 0.82rem;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.28rem;
-  transition: gap 0.25s;
-}
-.tile a.tile-link:hover { gap: 0.48rem; opacity: 1; }
-
-/* Empty tile */
-.tile-empty {
-  background: var(--surface);
-  border: 1.5px dashed var(--border);
-  border-radius: 12px;
-  padding: 1.75rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 180px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.35s ease;
-}
-.tile-empty::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 70% 30%, var(--accent-glow) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.tile-empty:hover::before {
-  opacity: 1;
-}
-.tile-empty:hover {
-  border-color: var(--accent-light);
-  transform: translateY(-2px);
-}
-.tile-empty i {
-  display: block; font-size: 1.5rem; font-style: normal;
-  opacity: 0.15; margin-bottom: 0.45rem;
-  position: relative;
-}
-.tile-empty p {
-  font-family: var(--serif);
-  font-style: italic;
-  color: var(--dim);
-  font-size: 0.95rem;
-  position: relative;
-}
-
-/* ═══ FOOTER ═══ */
-footer {
-  text-align: center;
-  padding: 2rem 1.5rem;
-  font-size: 0.75rem;
-  color: var(--dim);
-  margin-top: auto;
-}
-
-.page-wrap {
-  min-height: calc(100vh - 60px);
-  display: flex;
-  flex-direction: column;
-}
-
-/* ═══ RESPONSIVE ═══ */
-@media (max-width: 900px) {
-  .nav-brand-name {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-  nav {
-    height: 56px;
-    padding: 0 1rem;
-  }
-  body { padding-top: 56px; }
-  .page-wrap { min-height: calc(100vh - 56px); }
-
-  .nav-brand { left: 1rem; }
-  .nav-social { right: 1rem; gap: 0.2rem; }
-  .nav-social a { width: 36px; height: 36px; }
-  .nav-social a svg { width: 18px; height: 18px; }
-
-  .nav-tabs a {
-    padding: 0.38rem 0.85rem;
-    font-size: 0.82rem;
-  }
-
-  .content {
-    padding: 2rem 1.25rem;
-  }
-
-  .tile-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .about-layout {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-  }
-  .about-left {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    max-width: 100%;
-  }
-  .about-photo-container {
-    max-width: 220px;
-  }
-  .about-tags {
-    justify-content: center;
-  }
-  .about-buttons {
-    justify-content: center;
-  }
-  .about-tagline {
-    justify-content: center;
-  }
-  .about-tagline::before {
-    display: none;
-  }
-  .about-name {
-    font-size: 2.2rem;
-    text-align: center;
-  }
-  .about-role {
-    text-align: center;
-  }
-  .about-bio {
-    max-width: 100%;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-tabs a {
-    padding: 0.32rem 0.6rem;
-    font-size: 0.78rem;
-  }
-  .nav-avatar {
-    width: 30px; height: 30px;
-    font-size: 0.9rem;
-  }
-
-  .content {
-    padding: 1.5rem 1rem;
-  }
-
-  .tile-grid {
-    grid-template-columns: 1fr;
-  }
-  .tile-empty {
-    min-height: 140px;
-  }
-
-  .about-name {
-    font-size: 1.8rem;
-  }
-  .about-role {
-    font-size: 0.78rem;
-  }
-  .about-bio {
-    font-size: 0.9rem;
-  }
-  .about-photo-container {
-    max-width: 180px;
-  }
-  .about-section-label {
-    font-size: 0.62rem;
-  }
-  .about-tags span {
-    font-size: 0.72rem;
-  }
-
-  .timeline {
-    padding-left: 1.75rem;
-  }
-  .timeline-dot {
-    left: -1.75rem;
-  }
-  .timeline::before {
-    left: 5px;
-  }
-  .timeline-title {
-    font-size: 1.1rem;
-  }
-  .timeline-date {
-    font-size: 0.68rem;
-  }
-  .timeline-desc {
-    font-size: 0.8rem;
-  }
-  .timeline-detail {
-    font-size: 0.78rem;
-  }
-  .timeline-item {
-    padding-bottom: 1.5rem;
-  }
-
-  .view-projects-btn,
-  .contact-btn {
-    font-size: 0.85rem;
-    padding: 0.65rem 1.25rem;
-  }
-
-  footer {
-    font-size: 0.72rem;
-    padding: 1.75rem 1rem;
-  }
-}
-</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Praveen Emani",
+  "jobTitle": "Senior Software Engineer",
+  "description": "Senior Software Engineer building production agentic-AI and ML systems — multi-agent orchestration, RAG, evaluation, and guardrails.",
+  "url": "https://praveenpke.github.io/",
+  "knowsAbout": ["Agentic AI", "Multi-agent systems", "LangGraph", "RAG", "LLM evaluation", "MLOps", "Distributed systems"],
+  "alumniOf": [
+    { "@type": "CollegeOrUniversity", "name": "Wichita State University" },
+    { "@type": "CollegeOrUniversity", "name": "RGUKT" }
+  ],
+  "sameAs": [
+    "https://github.com/praveenpke",
+    "https://www.linkedin.com/in/praveenkemani/"
+  ]
+}
+</script>
 </head>
 <body>
 
-<nav>
-  <div class="nav-brand">
-    <div class="nav-avatar">P</div>
-    <span class="nav-brand-name">Praveen Emani</span>
-  </div>
-  <div class="nav-tabs">
-    <a href="#about" class="active" data-tab="about">About Me</a>
-    <a href="#projects" data-tab="projects">Projects</a>
-    <a href="#blog" data-tab="blog">Blog</a>
-  </div>
-  <div class="nav-social">
-    <a href="https://github.com/praveenpke" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
-    <a href="https://www.linkedin.com/in/praveenkemani/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
-  </div>
-</nav>
+<a class="skip-link" href="#main">Skip to content</a>
 
-<div class="page-wrap">
-  <div class="content">
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">Praveen Emani<span class="dot">.</span></a>
+    <div class="nav-menu">
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#work">Work</a></li>
+        <li><a href="#writing">Writing</a></li>
+      </ul>
+      <button class="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+      </button>
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
 
-    <!-- ABOUT TAB -->
-    <div class="tab-panel active" id="about">
-      <div class="about-layout">
-        <div class="about-left">
-          <div class="about-photo-container">
-            <div class="about-photo-accent"></div>
-            <div class="about-photo-wrap">
-              <img src="https://avatars.githubusercontent.com/u/35184782?v=4" alt="Praveen Emani" class="about-photo">
-            </div>
+<main id="main">
+  <div class="wrap" id="top">
+
+    <!-- HERO -->
+    <section class="hero">
+      <p class="kicker">Senior Software Engineer · Agentic AI · MLOps</p>
+      <h1>I build production agentic-AI systems that stay reliable in the real world.</h1>
+      <p class="lead">Seven-plus years building AI and ML systems end-to-end — autonomous multi-agent workflows, grounded RAG, safe tool-calling, and the evaluation that decides whether an agent ships or gets pulled.</p>
+      <p class="now"><b>Now</b> — leading the Agentic AI &amp; Platform team at AI Crew Solutions, and open-sourcing LangGraph orchestration, evaluation, and multi-agent pattern tooling.</p>
+      <div class="contact-row">
+        <a href="https://github.com/praveenpke" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
+        <a href="https://www.linkedin.com/in/praveenkemani/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</a>
+        <a href="/Praveen_Emani_Resume.pdf" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3v5h5"/><path d="M7 3h8l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>Résumé</a>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section about" id="about">
+      <div class="section-head"><h2>About</h2><span class="mono">01</span></div>
+      <div class="measure">
+        <p>I've spent 7+ years building production AI and ML systems end-to-end — from classical ML and distributed backends to today's autonomous multi-agent workflows. My focus is the part that decides whether an agent is a demo or a product: reliable orchestration, grounded retrieval, safe tool-calling, and evaluation you can actually trust.</p>
+        <p>I currently lead the Agentic AI &amp; Platform team at AI Crew Solutions, where I own the MLOps / AgentOps platform and set architecture standards across the team. I hold an M.S. in Computer Science and am an NVIDIA Certified Professional in Agentic AI.</p>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section class="section" id="experience">
+      <div class="section-head"><h2>Experience</h2><span class="mono">02</span></div>
+
+      <article class="entry">
+        <div class="entry-head">
+          <h3>AI Crew Solutions</h3>
+          <span class="mono">Aug 2022 — Present</span>
+        </div>
+        <p class="entry-role">Senior Software Engineer — Agentic AI &amp; Platform Team<span class="sep">·</span>Wichita, KS</p>
+        <ul class="bullets">
+          <li>Architected and led <b>5+ production autonomous multi-agent systems</b> (LangGraph, AutoGen) with supervisor-router patterns, hierarchical delegation, and ReAct + reflection — <b>85%+ autonomous resolution</b> on enterprise workflows.</li>
+          <li>Designed end-to-end RAG pipelines (hybrid retrieval, reranking, query planning, citation grounding) on LlamaIndex + Pinecone / pgvector — <b>cut hallucination ~60%</b> and lifted faithfulness to <b>92%+</b>.</li>
+          <li>Built tool / function-calling infrastructure (Pydantic schemas, multi-tool chaining, sandboxing, fallbacks) across <b>25+ APIs</b> — <b>&lt;0.1% unsafe invocation</b> via guardrails and human-in-the-loop gates.</li>
+          <li>Productionized agent evaluation (golden datasets, multi-axis rubrics, LLM-as-judge with human calibration, CI-gated regression) on Braintrust / LangSmith — <b>reduced production incidents 45%</b>.</li>
+          <li>Owned the MLOps / AgentOps platform (Docker / K8s + KubeRay, GitOps CI/CD, MLflow, LiteLLM / vLLM multi-model routing) — <b>3–5× throughput</b> and <b>40–60% cost reduction</b> at high volume.</li>
+          <li>Led a team of 6: defined architecture standards and internal SDKs, ran design and code reviews, mentored on prompt engineering and reliability — <b>+35% team velocity</b>, &gt;85% test coverage.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <div class="entry-head">
+          <h3>AI Crew Solutions</h3>
+          <span class="mono">Jun 2019 — Aug 2022</span>
+        </div>
+        <p class="entry-role">Software Engineer — Full-Stack &amp; ML Systems<span class="sep">·</span>Wichita, KS</p>
+        <ul class="bullets">
+          <li>Built full-stack features (Node.js / Express, Angular, MongoDB, Python microservices) and shipped classical ML models (scikit-learn, TensorFlow, XGBoost, Hugging Face) to production — <b>20–30% metric lifts</b>.</li>
+          <li>Designed ETL and feature pipelines in Python; set up CI/CD, Docker, and Kubernetes on AWS; mentored juniors on backend and ML integration.</li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- SELECTED WORK -->
+    <section class="section" id="work">
+      <div class="section-head"><h2>Selected Work</h2><span class="mono">03 · Open Source</span></div>
+
+      <article class="work-item">
+        <div class="work-head">
+          <h3><a href="https://github.com/praveenpke/telegram-email-agent" target="_blank" rel="noopener">Telegram Email Automation Agent <span class="arrow">↗</span></a></h3>
+        </div>
+        <p>A LangGraph supervisor — conditional routing and hierarchical delegation — that summarizes, drafts, prioritizes, and acts on email, with Telegram human-in-the-loop approvals for safe autonomy. Hybrid persistent memory, guardrailed Pydantic tools, LangSmith tracing, and LLM-as-judge evals on golden datasets. Open-sourced as a reusable FastAPI + Docker template.</p>
+        <p class="stack">LangGraph<span class="sep">·</span>FastAPI<span class="sep">·</span>Pydantic<span class="sep">·</span>LangSmith<span class="sep">·</span>Docker</p>
+      </article>
+
+      <article class="work-item">
+        <div class="work-head">
+          <h3><a href="https://github.com/praveenpke/fastapi-agent-template" target="_blank" rel="noopener">LangGraph + FastAPI Agent Backend Template <span class="arrow">↗</span></a></h3>
+        </div>
+        <p>A production harness for deploying reliable LangGraph agents at scale: async execution with persistent checkpointers, a tool registry, secure endpoints, observability (LangSmith + OpenTelemetry), guardrails, rate limiting, and sandboxed tools — with session management and graceful error recovery.</p>
+        <p class="stack">LangGraph<span class="sep">·</span>FastAPI<span class="sep">·</span>OpenTelemetry<span class="sep">·</span>Docker<span class="sep">·</span>CI/CD</p>
+      </article>
+
+      <article class="work-item">
+        <div class="work-head">
+          <h3><a href="https://github.com/praveenpke/agent-eval-harness" target="_blank" rel="noopener">Agent Evaluation &amp; Trajectory Harness <span class="arrow">↗</span></a></h3>
+        </div>
+        <p>A golden-dataset + LLM-as-judge pipeline with trajectory analysis across task success, reasoning, tool usage, and safety. Offline and online evals with CI/CD regression gating and trace visualization — applied across multiple agents to measurably improve reliability.</p>
+        <p class="stack">LangGraph<span class="sep">·</span>LLM-as-judge<span class="sep">·</span>LangSmith<span class="sep">·</span>CI/CD</p>
+      </article>
+
+      <article class="work-item">
+        <div class="work-head">
+          <h3><a href="https://github.com/praveenpke/multiagent-patterns" target="_blank" rel="noopener">Reusable Multi-Agent Patterns Library <span class="arrow">↗</span></a></h3>
+        </div>
+        <p>A modular, production-ready library of LangGraph patterns — supervisor, hierarchical delegation, reflection, HITL handoff, and memory modules with Pydantic state schemas — plus documented graphs, Mermaid diagrams, guardrails, and observability hooks for ReAct and plan-and-execute.</p>
+        <p class="stack">LangGraph<span class="sep">·</span>Pydantic<span class="sep">·</span>Mermaid<span class="sep">·</span>Observability</p>
+      </article>
+    </section>
+
+    <!-- SKILLS -->
+    <section class="section" id="skills">
+      <div class="section-head"><h2>Skills</h2><span class="mono">04</span></div>
+      <div class="skills-grid">
+        <div class="skill-group">
+          <h4>Languages &amp; Frameworks</h4>
+          <p>Python<span class="sep"> · </span>TypeScript<span class="sep"> · </span>JavaScript<span class="sep"> · </span>SQL<span class="sep"> · </span>Node.js<span class="sep"> · </span>React<span class="sep"> · </span>Angular</p>
+        </div>
+        <div class="skill-group">
+          <h4>Agentic AI &amp; LLM</h4>
+          <p>LangGraph<span class="sep"> · </span>LlamaIndex<span class="sep"> · </span>AutoGen<span class="sep"> · </span>CrewAI<span class="sep"> · </span>RAG<span class="sep"> · </span>Multi-agent orchestration<span class="sep"> · </span>Tool calling<span class="sep"> · </span>LLM-as-judge<span class="sep"> · </span>Guardrails</p>
+        </div>
+        <div class="skill-group">
+          <h4>ML &amp; Modeling</h4>
+          <p>PyTorch<span class="sep"> · </span>TensorFlow<span class="sep"> · </span>scikit-learn<span class="sep"> · </span>Hugging Face<span class="sep"> · </span>XGBoost<span class="sep"> · </span>Embeddings<span class="sep"> · </span>Vector search<span class="sep"> · </span>LoRA / QLoRA</p>
+        </div>
+        <div class="skill-group">
+          <h4>Infrastructure &amp; MLOps</h4>
+          <p>AWS<span class="sep"> · </span>SageMaker<span class="sep"> · </span>Bedrock<span class="sep"> · </span>Docker<span class="sep"> · </span>Kubernetes<span class="sep"> · </span>GitHub Actions<span class="sep"> · </span>ArgoCD<span class="sep"> · </span>MLflow<span class="sep"> · </span>LangSmith<span class="sep"> · </span>Grafana</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDUCATION & CERTS -->
+    <section class="section" id="background">
+      <div class="section-head"><h2>Education &amp; Certifications</h2><span class="mono">05</span></div>
+      <div class="two-col">
+        <div>
+          <p class="kicker" style="margin-bottom:var(--sp-4)">Education</p>
+          <div class="metarow">
+            <div><div class="title">M.S. — Computer Science &amp; Engineering</div><div class="sub">Wichita State University, USA</div></div>
           </div>
-          <div class="about-details">
-            <div class="about-section">
-              <h4 class="about-section-label">Focus Areas</h4>
-              <div class="about-tags">
-                <span>RAG & Vector Search</span>
-                <span>LLM Integration</span>
-                <span>Distributed Systems</span>
-                <span>Cloud Infrastructure</span>
-              </div>
-            </div>
-            <div class="about-section">
-              <h4 class="about-section-label">Tech Stack</h4>
-              <div class="about-tags">
-                <span>Python</span>
-                <span>Node.js</span>
-                <span>TypeScript</span>
-                <span>PostgreSQL</span>
-                <span>MongoDB</span>
-                <span>Redis</span>
-                <span>Docker</span>
-                <span>Kubernetes</span>
-                <span>AWS</span>
-                <span>GCP</span>
-                <span>LangChain</span>
-                <span>Qdrant</span>
-              </div>
-            </div>
-            <div class="about-section">
-              <h4 class="about-section-label">Interests</h4>
-              <div class="about-tags">
-                <span>Robotics</span>
-                <span>Consciousness Studies</span>
-                <span>Yoga</span>
-              </div>
-            </div>
-          </div>
-          <div class="about-buttons">
-            <a href="#projects" class="view-projects-btn" data-tab="projects">View Projects <span>&rarr;</span></a>
-            <a href="mailto:emanipraveenkumar60@gmail.com" class="contact-btn">Get in Touch</a>
+          <div class="metarow">
+            <div><div class="title">B.Tech — Electronics &amp; Computer Engineering</div><div class="sub">RGUKT, RK Valley, India</div></div>
           </div>
         </div>
-        <div class="about-right">
-          <div class="about-tagline">AI Infrastructure &middot; Distributed Systems</div>
-          <h2 class="about-name">Praveen<br><span class="about-name-accent">Emani</span></h2>
-          <p class="about-role">Senior Software Engineer &rarr; AI Infrastructure</p>
-          <p class="about-bio">7+ years building production distributed systems — 30+ microservices processing ~5M calculations/day on AWS. Led EC2-to-EKS migration, own multi-tenant infra for 7 enterprise customers. Now building AI infrastructure — multi-agent systems with LangGraph, MCP servers, and LLM developer tooling.</p>
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-dot"></div>
-              <div class="timeline-content">
-                <span class="timeline-date">2025 — Present</span>
-                <h3 class="timeline-title">AI Infrastructure</h3>
-                <p class="timeline-desc">Open Source / Independent</p>
-                <p class="timeline-detail">Building multi-agent systems (LangGraph), MCP servers, and LLM developer tooling.</p>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot"></div>
-              <div class="timeline-content">
-                <span class="timeline-date">2021 — Present</span>
-                <h3 class="timeline-title">Senior Software Engineer</h3>
-                <p class="timeline-desc">AI Crew Solutions</p>
-                <p class="timeline-detail">Own architecture and infra for multi-tenant SaaS — 30+ services, 7 enterprise customers, EKS migration, production reliability.</p>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot"></div>
-              <div class="timeline-content">
-                <span class="timeline-date">2019 — 2021</span>
-                <h3 class="timeline-title">Software Engineer</h3>
-                <p class="timeline-desc">AI Crew Solutions</p>
-                <p class="timeline-detail">Built core computation engines, scheduling optimizer, federated auth, and config-driven architecture from scratch.</p>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot"></div>
-              <div class="timeline-content">
-                <span class="timeline-date">M.S.</span>
-                <h3 class="timeline-title">Computer Networking</h3>
-                <p class="timeline-desc">Wichita State University</p>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot"></div>
-              <div class="timeline-content">
-                <span class="timeline-date">B.Tech</span>
-                <h3 class="timeline-title">Electronics & Computer Science</h3>
-                <p class="timeline-desc">RGUKT, India</p>
-              </div>
-            </div>
+        <div>
+          <p class="kicker" style="margin-bottom:var(--sp-4)">Certifications</p>
+          <div class="metarow">
+            <div><div class="title">Certified Professional — Agentic AI (NCP-AAI)</div><div class="sub">NVIDIA</div></div>
+          </div>
+          <div class="metarow">
+            <div><div class="title">Generative AI with Large Language Models</div><div class="sub">DeepLearning.AI</div></div>
+          </div>
+          <div class="metarow">
+            <div><div class="title">Deep Learning Specialization</div><div class="sub">DeepLearning.AI</div></div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- PROJECTS TAB -->
-    <div class="tab-panel" id="projects">
-      <div class="tile-grid">
-        <div class="tile">
-          <span class="tile-label">AI / LangGraph</span>
-          <h3>Code Awareness</h3>
-          <p>AI-powered desktop app that X-rays any codebase from a GitHub URL. 10-node LangGraph pipeline with 5 parallel analysis nodes generating architecture, quality, risk, and team dynamics reports in under 90 seconds.</p>
-          <div class="tile-tags">
-            <span>Electron</span>
-            <span>React</span>
-            <span>Python</span>
-            <span>LangGraph</span>
-            <span>Claude API</span>
-            <span>tree-sitter</span>
+    <!-- WRITING -->
+    <section class="section" id="writing">
+      <div class="section-head"><h2>Writing</h2><span class="mono">06</span></div>
+      <ul class="post-list">
+        <li class="post-row">
+          <div>
+            <a class="post-title" href="/posts/multi-agent-langgraph.html">Building Multi-Agent Systems with LangGraph</a>
+            <div class="post-tag">LangGraph · Agentic AI</div>
           </div>
-          <a href="https://github.com/praveenpke/repo_awareness" class="tile-link" target="_blank">View on GitHub &rarr;</a>
-        </div>
-        <div class="tile">
-          <span class="tile-label">AI / Multi-Agent</span>
-          <h3>TripForge</h3>
-          <p>Multi-agent trip planner with 5 LangGraph agents — parallel fan-out, human-in-the-loop checkpoints, per-agent LLM routing (Sonnet/Haiku), and live API grounding eliminating hallucinated recommendations.</p>
-          <div class="tile-tags">
-            <span>Python</span>
-            <span>FastAPI</span>
-            <span>LangGraph</span>
-            <span>LiteLLM</span>
-            <span>React</span>
-            <span>PostgreSQL</span>
+          <span class="post-date">2026</span>
+        </li>
+        <li class="post-row">
+          <div>
+            <a class="post-title" href="/posts/mcp-servers-real-time.html">MCP Servers: Extending LLMs with Real-Time Computation</a>
+            <div class="post-tag">MCP · Tool Calling</div>
           </div>
-          <a href="https://github.com/praveenpke/trip-planner" class="tile-link" target="_blank">View on GitHub &rarr;</a>
-        </div>
-        <div class="tile">
-          <span class="tile-label">AI / MCP</span>
-          <h3>AstroMCP</h3>
-          <p>MCP server with 12 tools giving Claude real-time astronomical calculations using NASA JPL DE441 ephemeris data. Replaces hallucinated positions with deterministic computations accurate to 0.1&deg;.</p>
-          <div class="tile-tags">
-            <span>Python</span>
-            <span>MCP SDK</span>
-            <span>Swiss Ephemeris</span>
-            <span>Pydantic</span>
+          <span class="post-date">2026</span>
+        </li>
+        <li class="post-row">
+          <div>
+            <a class="post-title" href="/posts/real-time-computation-engines.html">Real-Time Computation Engines at Scale</a>
+            <div class="post-tag">Distributed Systems</div>
           </div>
-          <a href="https://github.com/praveenpke/astrology_mcp" class="tile-link" target="_blank">View on GitHub &rarr;</a>
-        </div>
-        <div class="tile-empty"><i>&#9672;</i><p>More coming soon</p></div>
-        <div class="tile-empty"><i>&#9672;</i><p>More coming soon</p></div>
-        <div class="tile-empty"><i>&#9672;</i><p>More coming soon</p></div>
-      </div>
-    </div>
+          <span class="post-date">2026</span>
+        </li>
+        <li class="post-row">
+          <div>
+            <a class="post-title" href="/posts/multi-tenant-saas.html">Multi-Tenant SaaS: One Codebase, Seven Customers</a>
+            <div class="post-tag">Architecture</div>
+          </div>
+          <span class="post-date">2026</span>
+        </li>
+      </ul>
+      <a class="more-link" href="/blog.html">View all writing →</a>
+    </section>
 
-    <!-- BLOG TAB -->
-    <div class="tab-panel" id="blog">
-      <div class="tile-grid">
-        <div class="tile">
-          <span class="tile-label">LangGraph</span>
-          <h3>Building Multi-Agent Systems with LangGraph</h3>
-          <p>How I designed a 5-agent trip planning system with parallel execution, human-in-the-loop checkpoints, and per-agent model routing.</p>
-          <a href="posts/multi-agent-langgraph.html" class="tile-link">Read post &rarr;</a>
+    <!-- CONTACT -->
+    <section class="section" id="contact">
+      <div class="section-head"><h2>Get in touch</h2><span class="mono">07</span></div>
+      <div class="measure">
+        <p style="font-size:var(--fs-lead)">Open to senior and staff roles in agentic AI and ML platform engineering. Reach me on LinkedIn or GitHub.</p>
+        <div class="contact-row" style="margin-top:var(--sp-6)">
+          <a href="https://www.linkedin.com/in/praveenkemani/" target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="https://github.com/praveenpke" target="_blank" rel="noopener">GitHub ↗</a>
+          <a href="/Praveen_Emani_Resume.pdf" target="_blank" rel="noopener">Résumé ↗</a>
         </div>
-        <div class="tile">
-          <span class="tile-label">MCP</span>
-          <h3>MCP Servers: Extending LLMs with Real-Time Computation</h3>
-          <p>Why I built an MCP server to replace hallucinated LLM outputs with deterministic NASA ephemeris calculations.</p>
-          <a href="posts/mcp-servers-real-time.html" class="tile-link">Read post &rarr;</a>
-        </div>
-        <div class="tile">
-          <span class="tile-label">Distributed Systems</span>
-          <h3>Real-Time Computation Engines at Scale</h3>
-          <p>Lessons from building a computation engine processing ~5M calculations/day with cascading dependency resolution.</p>
-          <a href="posts/real-time-computation-engines.html" class="tile-link">Read post &rarr;</a>
-        </div>
-        <div class="tile">
-          <span class="tile-label">Architecture</span>
-          <h3>Multi-Tenant SaaS: One Codebase, Seven Customers</h3>
-          <p>How config-driven architecture scaled our platform from 2 to 7 enterprise customers without per-tenant code paths.</p>
-          <a href="posts/multi-tenant-saas.html" class="tile-link">Read post &rarr;</a>
-        </div>
-        <div class="tile-empty"><i>&#9998;</i><p>More coming soon</p></div>
-        <div class="tile-empty"><i>&#9998;</i><p>More coming soon</p></div>
       </div>
-    </div>
+    </section>
 
   </div>
+</main>
 
-  <footer>&copy; 2026 Praveen Emani</footer>
-</div>
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <span class="mono">© 2026 Praveen Emani</span>
+    <div class="footer-links">
+      <a href="https://github.com/praveenpke" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/praveenkemani/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</footer>
 
-<script>
-const tabs = document.querySelectorAll('.nav-tabs [data-tab]');
-const panels = document.querySelectorAll('.tab-panel');
-
-function switchTab(tabId) {
-  tabs.forEach(t => t.classList.remove('active'));
-  panels.forEach(p => p.classList.remove('active'));
-  const navTab = document.querySelector(`.nav-tabs [data-tab="${tabId}"]`);
-  if (navTab) navTab.classList.add('active');
-  document.getElementById(tabId).classList.add('active');
-}
-
-tabs.forEach(tab => {
-  tab.addEventListener('click', e => {
-    e.preventDefault();
-    switchTab(tab.dataset.tab);
-  });
-});
-
-// View Projects button
-document.querySelectorAll('.view-projects-btn').forEach(btn => {
-  btn.addEventListener('click', e => {
-    e.preventDefault();
-    switchTab(btn.dataset.tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-});
-</script>
-
+<script defer src="/assets/main.js"></script>
 </body>
 </html>

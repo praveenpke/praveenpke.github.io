@@ -1,345 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multi-Tenant SaaS: One Codebase, Seven Customers — Praveen Emani</title>
-<meta name="description" content="How we serve 7 enterprise customers with different auth, business rules, theming, and data sources from a single deployment using config-driven multi-tenant architecture.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  --bg: #0a0a0b;
-  --bg-elevated: #111113;
-  --accent: #c4f042;
-  --text: #e0e0e0;
-  --text-muted: #888;
-  --text-dim: #555;
-  --border: #222;
-  --font-mono: 'IBM Plex Mono', monospace;
-  --font-serif: 'Newsreader', serif;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.7;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Film grain */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-a:hover {
-  opacity: 0.8;
-}
-
-::selection {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-/* NAV */
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: rgba(10, 10, 11, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 2rem;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.nav-logo {
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.02em;
-}
-.nav-logo span {
-  color: var(--accent);
-}
-
-.nav-links {
-  display: flex;
-  gap: 2rem;
-  list-style: none;
-}
-.nav-links a {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  transition: color 0.2s;
-}
-.nav-links a:hover {
-  color: var(--accent);
-  opacity: 1;
-}
-
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-  padding: 4px;
-  background: none;
-  border: none;
-}
-.hamburger span {
-  display: block;
-  width: 22px;
-  height: 2px;
-  background: var(--text);
-  transition: transform 0.3s, opacity 0.3s;
-}
-
-/* ARTICLE */
-.post {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 8rem 2rem 4rem;
-}
-
-.post-back {
-  display: inline-block;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 3rem;
-  transition: color 0.2s;
-}
-.post-back:hover {
-  color: var(--accent);
-  opacity: 1;
-}
-
-.post-meta {
-  margin-bottom: 2.5rem;
-}
-
-.post-tag {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--accent);
-  margin-bottom: 1rem;
-  display: block;
-}
-
-.post-title {
-  font-family: var(--font-serif);
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  margin-bottom: 1rem;
-}
-
-.post-date {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-}
-
-.post-body {
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  line-height: 1.9;
-  color: var(--text-muted);
-}
-
-.post-body h2 {
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text);
-  margin: 2.5rem 0 1rem;
-}
-
-.post-body h3 {
-  font-family: var(--font-serif);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text);
-  margin: 2rem 0 0.75rem;
-}
-
-.post-body p {
-  margin-bottom: 1.25rem;
-}
-
-.post-body strong {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.post-body code {
-  font-family: var(--font-mono);
-  font-size: 0.85em;
-  background: var(--bg-elevated);
-  padding: 0.15em 0.4em;
-  border-radius: 3px;
-  color: var(--accent);
-}
-
-.post-body pre {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  padding: 1.5rem;
-  overflow-x: auto;
-  margin: 1.5rem 0;
-  border-radius: 3px;
-}
-.post-body pre code {
-  background: none;
-  padding: 0;
-  font-size: 0.85rem;
-  color: var(--text);
-}
-
-.post-body blockquote {
-  border-left: 3px solid var(--accent);
-  padding-left: 1.25rem;
-  margin: 1.5rem 0;
-  font-style: italic;
-  color: var(--text-dim);
-}
-
-.post-body ul, .post-body ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1.25rem;
-}
-.post-body li {
-  margin-bottom: 0.5rem;
-}
-
-.post-body img {
-  max-width: 100%;
-  border-radius: 3px;
-  margin: 1.5rem 0;
-}
-
-.post-body hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 2.5rem 0;
-}
-
-/* FOOTER */
-footer {
-  text-align: center;
-  padding: 3rem 2rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.75rem;
-  color: var(--text-dim);
-}
-
-@media (max-width: 768px) {
-  .nav-links {
-    position: fixed;
-    top: 56px;
-    left: 0;
-    right: 0;
-    background: rgba(10, 10, 11, 0.97);
-    flex-direction: column;
-    padding: 2rem;
-    gap: 1.5rem;
-    border-bottom: 1px solid var(--border);
-    transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-  .nav-links.open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: all;
-  }
-  .hamburger {
-    display: flex;
-  }
-
-  .post {
-    padding: 6rem 1.5rem 3rem;
-  }
-  .post-title {
-    font-size: 1.6rem;
-  }
-  .post-body {
-    font-size: 1rem;
-  }
-}
-</style>
+<meta name="description" content="How a config-driven, database-per-tenant architecture serves seven enterprise customers from one codebase, cutting onboarding from six weeks to five days.">
+<link rel="canonical" href="https://praveenpke.github.io/posts/multi-tenant-saas.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://praveenpke.github.io/posts/multi-tenant-saas.html">
+<meta property="og:title" content="Multi-Tenant SaaS: One Codebase, Seven Customers — Praveen Emani">
+<meta property="og:description" content="How a config-driven, database-per-tenant architecture serves seven enterprise customers from one codebase, cutting onboarding from six weeks to five days.">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/35184782?v=4">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/assets/style.css">
+<script>
+(function(){try{var t=localStorage.getItem("theme");if(!t){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a href="../index.html" class="nav-logo">pk<span>.</span></a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="../index.html#about">About Me</a></li>
-    <li><a href="../index.html#projects">Projects</a></li>
-    <li><a href="../index.html#blog">Blog</a></li>
-    <li><a href="../index.html#contact">Contact</a></li>
-  </ul>
-  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
-</nav>
+<a class="skip-link" href="#main">Skip to content</a>
 
-<!-- POST -->
-<article class="post">
-  <a href="../index.html#blog" class="post-back">&larr; Back to all posts</a>
-
-  <div class="post-meta">
-    <span class="post-tag">ARCHITECTURE / SAAS</span>
-    <h1 class="post-title">Multi-Tenant SaaS: One Codebase, Seven Customers</h1>
-    <p class="post-date">March 2026</p>
+<header class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">Praveen Emani<span class="dot">.</span></a>
+    <div class="nav-menu">
+      <ul class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#experience">Experience</a></li>
+        <li><a href="/#work">Work</a></li>
+        <li><a href="/blog.html">Writing</a></li>
+      </ul>
+      <button class="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+      </button>
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
   </div>
+</header>
 
-  <div class="post-body">
+<main id="main">
+  <article class="post">
+    <a href="/blog.html" class="post-back">← All writing</a>
+
+    <div class="post-meta">
+      <p class="kicker">Architecture · SaaS</p>
+      <h1>Multi-Tenant SaaS: One Codebase, Seven Customers</h1>
+      <p class="post-date">March 2026</p>
+    </div>
+
+    <div class="post-body">
     <p>How do you serve seven enterprise customers&mdash;each with different auth providers, different business rules, different UI theming, and different data sources&mdash;from a single deployment? Not seven forks. Not seven branches. One codebase, one CI/CD pipeline, one deployment artifact. That was the constraint we set when the platform had three customers and it became obvious we would not survive the next two years maintaining per-client branches. What followed was a ground-up rearchitecture into a config-driven multi-tenant system that cut onboarding time from six-plus weeks to under five days and directly enabled three new enterprise contracts.</p>
 
     <h2>Why Database-Per-Tenant</h2>
@@ -438,27 +149,21 @@ async function resolveTenant(req, res, next) {
     <hr>
 
     <p>Seven customers, one codebase, zero per-client branches. The system is not perfect&mdash;config complexity is real, operational overhead is real&mdash;but the alternative was a branching strategy that would have collapsed under its own weight by customer number four. If you are building a B2B SaaS product and you are not yet thinking about config-driven multi-tenancy, start now. The migration only gets harder.</p>
-  </div>
-</article>
+    </div>
+  </article>
+</main>
 
-<footer>
-  <p>&copy; 2025 Praveen Emani. Built with vanilla HTML/CSS/JS.</p>
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <span class="mono">© 2026 Praveen Emani</span>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/blog.html">Writing</a>
+      <a href="https://github.com/praveenpke" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
 </footer>
 
-<script>
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('navLinks');
-hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('active');
-  navLinks.classList.toggle('open');
-});
-navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    hamburger.classList.remove('active');
-    navLinks.classList.remove('open');
-  });
-});
-</script>
-
+<script defer src="/assets/main.js"></script>
 </body>
 </html>
