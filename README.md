@@ -7,21 +7,24 @@ Built with vanilla HTML/CSS/JS, no build step. Hosted on GitHub Pages.
 ## Structure
 
 ```
-index.html              Single-page hub (hero, about, experience, work, skills, writing, contact)
-blog.html               Writing archive
+index.html              Landing (no-scroll): name, role, two CTAs, photo
+work.html               Experience timeline, skills, education & certifications
+projects.html           Open-source project cards
+blog.html               Writing — article cards
 posts/*.html            Individual posts (share the same design system)
 posts/template.html     Starter for new posts
 assets/style.css        Shared design system (one source of truth; root-relative)
-assets/main.js          Theme toggle, mobile nav, scroll-spy
+assets/main.js          Reveal-on-scroll
 robots.txt, sitemap.xml SEO / crawl layer
 ```
 
 ## Design
 
-Monochrome (light + hand-tuned dark theme via `prefers-color-scheme` + toggle persisted in
-`localStorage`), system font stack (no web fonts → zero render-blocking, no CLS), hairline
-rules instead of cards. Accessible: skip link, landmarks, visible focus rings,
-`prefers-reduced-motion` honored. All design tokens live in `:root` in `assets/style.css`.
+Multi-page black/white portfolio (implemented from a Claude Design handoff). Dark landing &
+projects pages, light work & writing pages — driven by a `body.dark` / `body.light` class that
+flips the CSS variables in `assets/style.css`. Typeface: **Geist** + **Geist Mono**. Hairline
+rules and cards over chrome. Accessible: skip links, visible focus rings, `prefers-reduced-motion`
+honored (reveal animations disabled).
 
 ## Adding a post
 
