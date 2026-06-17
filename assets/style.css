@@ -162,10 +162,10 @@ img { display: block; max-width: 100%; }
    WORK — split layout: experience timeline + sticky aside
    ============================================================ */
 .work-layout {
-  max-width: var(--maxw); margin: 0 auto;
-  padding: clamp(52px,9vh,96px) clamp(20px,5vw,64px) clamp(48px,8vh,90px);
-  display: grid; grid-template-columns: minmax(0,1.5fr) minmax(0,0.85fr) minmax(0,0.85fr);
-  gap: clamp(28px,3.2vw,56px); align-items: start;
+  max-width: 1640px; margin: 0 auto;
+  padding: clamp(48px,8vh,88px) clamp(20px,3vw,44px) clamp(48px,8vh,90px);
+  display: grid; grid-template-columns: minmax(0,1.45fr) minmax(0,0.95fr) minmax(0,0.95fr);
+  gap: clamp(24px,2.4vw,44px); align-items: start;
 }
 .work-main { min-width: 0; }
 .col-head { margin-bottom: clamp(24px,4vh,40px); }
