@@ -1,5 +1,5 @@
 /* Praveen Emani — interactions (progressive enhancement)
-   1) reveal-on-scroll  2) landing streaming intro + looping badge  3) golden-spiral rover */
+   1) reveal-on-scroll  2) landing streaming intro + looping badge  3) square-spiral grid rover */
 (function () {
   "use strict";
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -25,26 +25,26 @@
   /* ---------- looping badge text ---------- */
   function startRotor(el) {
     if (!el) return;
-    var phrases = ["AI/ML projects", "robotics", "LLM inference", "multi-agent systems",
-                   "agent evaluation", "RAG pipelines", "autonomous agents"];
+    var phrases = ["AI/ML Projects", "Robotics", "LLM Inference", "Multi-Agent Systems",
+                   "Agent Evaluation", "RAG Pipelines", "Autonomous Agents"];
     var i = 0;
     function typeP(s, cb) {
       var j = 0;
       (function t() {
         el.textContent = s.slice(0, j);
-        if (j++ <= s.length) setTimeout(t, 45 + Math.random() * 45); else cb();
+        if (j++ <= s.length) setTimeout(t, 85 + Math.random() * 70); else cb();
       })();
     }
     function delP(cb) {
       var s = el.textContent, j = s.length;
       (function d() {
         el.textContent = s.slice(0, j);
-        if (j-- > 0) setTimeout(d, 26); else cb();
+        if (j-- > 0) setTimeout(d, 45); else cb();
       })();
     }
     function next() {
       var s = phrases[i % phrases.length]; i++;
-      typeP(s, function () { setTimeout(function () { delP(next); }, 1500); });
+      typeP(s, function () { setTimeout(function () { delP(next); }, 1700); });
     }
     delP(next);
   }
@@ -112,7 +112,7 @@
     }, 760);
   })();
 
-  /* ---------- 3) golden-spiral rover ---------- */
+  /* ---------- 3) square-spiral grid rover ---------- */
   (function () {
     var landing = document.querySelector(".landing");
     if (!landing || reduce) return;
@@ -132,43 +132,52 @@
     landing.insertBefore(layer, landing.firstChild);
 
     var ctx = canvas.getContext("2d");
-    var W = 0, H = 0, dpr = 1, cx = 0, cy = 0, R0 = 0;
-    var THETA0 = Math.PI * 1.25;   // start in the upper-left
-    var K = 0.20;                  // inward decay (~3-4 fibonacci-style turns)
-    var V = 1.35;                  // ~constant linear speed (px/frame)
-    var MINR = 7;
-    var theta = THETA0, prevX = null, prevY = null;
+    var G = 58, STEP = 116, SPEED = 1.4, W = 0, H = 0, dpr = 1;
+    var DIRV = [[1, 0], [0, 1], [-1, 0], [0, -1]];   // right, down, left, up
+    var L, R, T, B, dir, x, y;
 
     function reset() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = landing.clientWidth; H = landing.clientHeight || window.innerHeight;
       canvas.width = Math.max(1, W * dpr); canvas.height = Math.max(1, H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cx = W * 0.34; cy = H * 0.50;
-      R0 = Math.min(cx, cy) * 1.25;   // start ~75% toward the top-left, not the corner
+      L = G; T = G;
+      R = Math.max(L + STEP, Math.floor((W - G) / G) * G);
+      B = Math.max(T + STEP, Math.floor((H - G) / G) * G);
+      dir = 0; x = L; y = T;
     }
     reset();
-    window.addEventListener("resize", function () { reset(); theta = THETA0; prevX = prevY = null; }, { passive: true });
+    window.addEventListener("resize", reset, { passive: true });
+
+    function corner() {
+      // reached the end of the current edge: inset one bound and turn inward
+      if (dir === 0) { T += STEP; dir = 1; }
+      else if (dir === 1) { R -= STEP; dir = 2; }
+      else if (dir === 2) { B -= STEP; dir = 3; }
+      else { L += STEP; dir = 0; }
+      if (L >= R || T >= B) reset();   // spiral collapsed → restart from the outer square
+    }
 
     function frame() {
       ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = "rgba(0,0,0,0.05)";
+      ctx.fillStyle = "rgba(0,0,0,0.045)";
       ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = "source-over";
 
-      var r = R0 * Math.exp(-K * (theta - THETA0));
-      var x = cx + r * Math.cos(theta), y = cy + r * Math.sin(theta);
+      x += DIRV[dir][0] * SPEED; y += DIRV[dir][1] * SPEED;
+
+      var reached = false;
+      if (dir === 0 && x >= R) { x = R; reached = true; }
+      else if (dir === 1 && y >= B) { y = B; reached = true; }
+      else if (dir === 2 && x <= L) { x = L; reached = true; }
+      else if (dir === 3 && y <= T) { y = T; reached = true; }
 
       ctx.fillStyle = "rgba(255,77,61,0.6)";
       ctx.beginPath(); ctx.arc(x, y, 1.7, 0, Math.PI * 2); ctx.fill();
 
-      var deg = 0;
-      if (prevX !== null) deg = Math.atan2(y - prevY, x - prevX) * 180 / Math.PI;
-      rover.style.transform = "translate(" + x + "px," + y + "px) rotate(" + deg + "deg)";
-      prevX = x; prevY = y;
+      rover.style.transform = "translate(" + x + "px," + y + "px) rotate(" + (dir * 90) + "deg)";
 
-      theta += V / Math.max(r, 11);
-      if (r < MINR) { theta = THETA0; prevX = prevY = null; }   // loop the spiral
+      if (reached) corner();
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
