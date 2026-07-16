@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Work — Praveen Emani</title>
-<meta name="description" content="Experience, skills, and credentials of Praveen Emani — seven years building production systems from classical ML and full-stack to agentic AI.">
+<meta name="description" content="Experience, skills, and credentials of Praveen Emani — 7+ years building multi-tenant SaaS, event-driven AWS systems, and production agentic AI (LangGraph, Bedrock, RAG).">
 <link rel="canonical" href="https://praveenpke.github.io/work.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://praveenpke.github.io/work.html">
 <meta property="og:title" content="Work — Praveen Emani">
-<meta property="og:description" content="Experience, skills, and credentials — seven years building production systems from classical ML to agentic AI.">
+<meta property="og:description" content="Experience, skills, and credentials — 7+ years building multi-tenant SaaS, event-driven AWS systems, and production agentic AI.">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/35184782?v=4">
 <meta name="twitter:card" content="summary">
 
@@ -42,25 +42,29 @@
       <div class="col-head reveal"><div class="eyebrow"><span class="mk">//</span> Experience</div></div>
       <div class="tl">
         <article class="tl-item reveal">
-          <div class="when">2022 — Now · Wichita, KS · Hybrid</div>
+          <div class="when">Aug 2022 — Now</div>
           <h3>Senior Software Engineer <span class="role">— Agentic AI &amp; Platform</span></h3>
-          <div class="org">AI Crew Solutions</div>
+          <div class="org">AI Crew Solutions · multi-tenant SaaS for airline crew operations</div>
           <ul>
-            <li>Architected 5+ production autonomous multi-agent systems (LangGraph, AutoGen) — supervisor-router, hierarchical delegation, ReAct + reflection — reaching <strong>85%+ autonomous resolution</strong>.</li>
-            <li>Designed end-to-end RAG (hybrid retrieval, reranking, citation grounding) with LlamaIndex + Pinecone/pgvector — <strong>cut hallucination ~60%</strong>, faithfulness 92%+.</li>
-            <li>Built guardrailed tool/function-calling infra across 25+ APIs — <strong>&lt;0.1% unsafe invocation</strong> via human-in-the-loop gates.</li>
-            <li>Owned the MLOps/AgentOps platform (K8s + KubeRay, MLflow, vLLM/LiteLLM routing) — <strong>3–5× throughput, 40–60% cost reduction</strong>.</li>
-            <li>Led a team of 6 — architecture standards, internal SDKs, mentoring — <strong>+35% velocity, &gt;85% test coverage</strong>.</li>
+            <li>Lead engineer for a multi-tenant SaaS platform serving <strong>8+ enterprise airline customers and 40,000+ crew members</strong> — own architecture end to end, lead a team of 6, and work directly with customer operations and security teams.</li>
+            <li>Designed and shipped a <strong>production agentic AI assistant</strong> (LangGraph.js, AWS Bedrock/Claude) — tool-calling over MongoDB plus RAG (Atlas Vector Search), with a JWT-scoped permission boundary: even a fully jailbroken model can only read what the caller is authorized to see.</li>
+            <li>Versioned prompts gated by <strong>CI evaluations</strong> (tool accuracy, groundedness, security refusals), Langfuse tracing, 5% canary rollouts, and model routing keeping <strong>~80% of turns on a low-cost model</strong>.</li>
+            <li>Redesigned a batch compliance engine (<strong>100+ FAA duty-time and rest rules</strong>, FAR 117/121) into an event-driven system — latency cut <strong>from 5 minutes to seconds</strong>; a 16,000-person schedule burst drains in ~3 minutes via SQS FIFO serialization.</li>
+            <li>Built multi-channel notifications (Twilio SMS/Voice, SendGrid) with <strong>exactly-once delivery</strong>, ~14x message coalescing, and SMS → voice → human escalation at <strong>97%+ delivery rates</strong>.</li>
+            <li>Delivered near-real-time operational dashboards on precomputed aggregates — <strong>O(1) single-document page loads</strong>, ≤2-minute staleness, zero warehouse infrastructure.</li>
           </ul>
         </article>
 
         <article class="tl-item reveal">
-          <div class="when">2019 — 2022 · Wichita, KS</div>
-          <h3>Software Engineer <span class="role">— Full-Stack &amp; ML Systems</span></h3>
+          <div class="when">Jun 2019 — Aug 2022</div>
+          <h3>Software Engineer <span class="role">— Full-Stack &amp; Data Platform</span></h3>
           <div class="org">AI Crew Solutions</div>
           <ul>
-            <li>Shipped full-stack features (Node/Express, Angular, MongoDB, Python microservices) and classical ML (scikit-learn, TensorFlow, XGBoost) — <strong>20–30% metric lifts</strong>.</li>
-            <li>Designed ETL/feature pipelines, set up CI/CD, Docker, and Kubernetes on AWS; mentored juniors on backend + ML integration.</li>
+            <li>Built the platform's core pipeline syncing <strong>100,000+ records</strong> from 8+ legacy on-premises SQL databases with no CDC support, over site-to-site VPN — watermark-based incremental extraction plus nightly hash-diff reconciliation.</li>
+            <li>Cut per-cycle data transfer <strong>&gt;95%</strong>, database writes <strong>~99%</strong>, and cross-VPN transfer ~90%; improved write throughput <strong>3–4x</strong> with bulk upserts.</li>
+            <li>Designed the canonical data model and per-tenant declarative mappings — new-customer onboarding became <strong>configuration only</strong>, with database-per-tenant isolation making cross-customer leaks structurally impossible.</li>
+            <li>Built the serving layer end to end: cursor-paginated, index-backed REST APIs (Node.js/Express) and a <strong>React frontend</strong> with query caching and list virtualization.</li>
+            <li>Immutable S3 raw staging with <strong>replay</strong> — no re-querying customer systems — idempotent upserts, dead-letter queues, and per-tenant sync-lag alarms.</li>
           </ul>
         </article>
       </div>
@@ -74,31 +78,47 @@
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg></span>
           <div class="body">
             <div class="label">Languages</div>
-            <div class="taglist"><span>Python</span><span>TypeScript</span><span>JavaScript</span><span>SQL</span><span>Node</span><span>React</span><span>Angular</span></div>
+            <div class="taglist"><span>TypeScript</span><span>JavaScript (Node.js)</span><span>Python</span><span>SQL</span></div>
           </div>
         </div>
 
         <div class="frow">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.1"/><circle cx="18" cy="6" r="2.1"/><circle cx="12" cy="18" r="2.1"/><path d="M7.6 7.7 11 15.6M16.4 7.7 13 15.6"/></svg></span>
           <div class="body">
-            <div class="label">Agentic AI &amp; LLM</div>
-            <div class="taglist"><span>LangGraph</span><span>LlamaIndex</span><span>AutoGen</span><span>CrewAI</span><span>RAG</span><span>Tool calling</span><span>LLM-as-judge</span><span>Guardrails</span></div>
+            <div class="label">AI / LLM</div>
+            <div class="taglist"><span>LangGraph</span><span>AWS Bedrock (Claude)</span><span>RAG</span><span>Vector embeddings</span><span>Agentic tool use</span><span>LLM evaluation</span><span>Langfuse</span><span>Guardrails</span><span>MCP</span></div>
           </div>
         </div>
 
         <div class="frow">
-          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v15h16"/><path d="M8 15l3.5-4 3 2.2L21 7"/></svg></span>
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5V18c0 1.66 3.58 3 8 3s8-1.34 8-3V5.5"/><path d="M4 11.75c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg></span>
           <div class="body">
-            <div class="label">ML &amp; Modeling</div>
-            <div class="taglist"><span>PyTorch</span><span>TensorFlow</span><span>scikit-learn</span><span>XGBoost</span><span>Hugging Face</span><span>Embeddings</span><span>Vector search</span><span>LoRA</span><span>QLoRA</span></div>
+            <div class="label">Backend &amp; Data</div>
+            <div class="taglist"><span>Node.js</span><span>Express</span><span>REST API design</span><span>MongoDB Atlas</span><span>Vector Search</span><span>DynamoDB</span><span>PostgreSQL</span><span>ELT/ETL</span><span>Event-driven</span></div>
           </div>
         </div>
 
         <div class="frow">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="6" rx="1.5"/><rect x="3.5" y="13.5" width="17" height="6" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></span>
           <div class="body">
-            <div class="label">Infra &amp; MLOps</div>
-            <div class="taglist"><span>AWS</span><span>SageMaker</span><span>Bedrock</span><span>Docker</span><span>Kubernetes</span><span>GitHub Actions</span><span>ArgoCD</span><span>MLflow</span><span>LangSmith</span><span>vLLM</span><span>LiteLLM</span><span>Grafana</span></div>
+            <div class="label">Cloud &amp; DevOps</div>
+            <div class="taglist"><span>ECS Fargate</span><span>SQS/SNS</span><span>EventBridge</span><span>S3</span><span>Lambda</span><span>CloudWatch</span><span>Secrets Manager</span><span>IAM</span><span>Docker</span><span>Terraform</span><span>CI/CD</span></div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 9h18"/><path d="M6.5 6.75h.01M9 6.75h.01"/></svg></span>
+          <div class="body">
+            <div class="label">Frontend</div>
+            <div class="taglist"><span>React</span><span>TanStack Query</span><span>Recharts</span><span>List virtualization</span><span>SSE streaming UIs</span></div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13.5a4.5 4.5 0 0 0 6.36 0l2.5-2.5a4.5 4.5 0 1 0-6.36-6.36L11.25 5.9"/><path d="M14 10.5a4.5 4.5 0 0 0-6.36 0l-2.5 2.5a4.5 4.5 0 1 0 6.36 6.36l1.25-1.26"/></svg></span>
+          <div class="body">
+            <div class="label">Integrations</div>
+            <div class="taglist"><span>Twilio (SMS/Voice)</span><span>SendGrid</span><span>Signature-verified webhooks</span><span>ODBC / legacy databases</span></div>
           </div>
         </div>
       </div>
@@ -109,8 +129,16 @@
         <div class="frow">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5 2.5 9 12 13.5 21.5 9 12 4.5z"/><path d="M6 11v4.4c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V11"/></svg></span>
           <div class="body">
-            <div class="title">M.S. Computer Science &amp; Engineering</div>
-            <div class="meta">Wichita State University</div>
+            <div class="title">M.S. Computer Science</div>
+            <div class="meta">Wichita State University · Wichita, KS</div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5 2.5 9 12 13.5 21.5 9 12 4.5z"/><path d="M6 11v4.4c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6V11"/></svg></span>
+          <div class="body">
+            <div class="title">B.Tech Electronics &amp; Computer Engineering</div>
+            <div class="meta">RGUKT, RK Valley · India</div>
           </div>
         </div>
 
@@ -125,8 +153,8 @@
         <div class="frow">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5"/><path d="M8.5 13 7 21l5-2.5L17 21l-1.5-8"/></svg></span>
           <div class="body">
-            <div class="title">Generative AI with LLMs</div>
-            <div class="meta">DeepLearning.AI</div>
+            <div class="title">Introduction to LangGraph</div>
+            <div class="meta">LangChain Academy</div>
           </div>
         </div>
 
